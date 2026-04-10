@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,6 +21,22 @@ const ReservationSection = () => {
   const [payment, setPayment] = useState("local");
   const [name, setName] = useState("");
 
+  const availableHours = useMemo(() => {
+    if (!date) return [];
+    const d = new Date(date + "T00:00:00");
+    const day = d.getDay(); // 0=Sun, 6=Sat
+    const isWeekend = day === 0 || day === 6;
+    const startHour = isWeekend ? 19 : 18;
+    const endHour = isWeekend ? 23 : 24;
+    const hours: string[] = [];
+    for (let h = startHour; h < endHour; h++) {
+      const hh = h.toString().padStart(2, "0");
+      hours.push(`${hh}:00`);
+      hours.push(`${hh}:30`);
+    }
+    return hours;
+  }, [date]);
+
   const handleReserve = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTable || !date || !time || !name) {
@@ -36,10 +52,10 @@ const ReservationSection = () => {
         <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-16">
           <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-4">Reserve Sua Experiência</p>
           <h2 className="text-3xl md:text-5xl font-extralight tracking-[0.1em] text-foreground">Reserva</h2>
+          <p className="text-xs text-muted-foreground mt-4 font-light">Seg–Sex: 18h às 00h &nbsp;|&nbsp; Sáb–Dom: 19h às 23h</p>
         </motion.div>
 
         <form onSubmit={handleReserve} className="max-w-2xl mx-auto space-y-10">
-          {/* Table selection */}
           <div>
             <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Posição da Mesa</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -53,7 +69,6 @@ const ReservationSection = () => {
             </div>
           </div>
 
-          {/* Form fields */}
           <div className="grid md:grid-cols-2 gap-6">
             <input type="text" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)}
               className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
@@ -61,13 +76,15 @@ const ReservationSection = () => {
               className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors">
               {[1,2,3,4,5,6,7,8,10,12].map(n => <option key={n} value={n}>{n} {n === 1 ? "pessoa" : "pessoas"}</option>)}
             </select>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+            <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(""); }}
               className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors" />
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)}
-              className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors" />
+            <select value={time} onChange={(e) => setTime(e.target.value)} disabled={!date}
+              className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors disabled:opacity-40">
+              <option value="">{date ? "Selecione o horário" : "Selecione a data primeiro"}</option>
+              {availableHours.map(h => <option key={h} value={h}>{h}</option>)}
+            </select>
           </div>
 
-          {/* Payment */}
           <div>
             <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Forma de Pagamento</p>
             <div className="flex gap-4">
