@@ -18,7 +18,7 @@ const ContactSection = () => {
             <div>
               <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">Endereço</p>
               <p className="text-sm font-light text-foreground">Allee der Sterne, nº 1010</p>
-              <p className="text-sm font-light text-foreground">Vila Germânica</p>
+              <p className="text-sm font-light text-foreground">Vila Germânica, Curitiba — PR</p>
             </div>
             <div>
               <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">Telefone</p>
@@ -30,18 +30,19 @@ const ContactSection = () => {
             </div>
             <div>
               <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">Horário</p>
-              <p className="text-sm font-light text-foreground">Ter – Dom: 18h00 – 23h00</p>
-              <p className="text-sm font-light text-muted-foreground">Segunda: Fechado</p>
+              <p className="text-sm font-light text-foreground">Segunda a Sexta: 18h às 00h</p>
+              <p className="text-sm font-light text-foreground">Sábados e Domingos: 19h às 23h</p>
             </div>
           </div>
 
-          <div className="w-full h-80 md:h-96 overflow-hidden border border-border">
+          <div className="w-full h-80 md:h-96 overflow-hidden rounded-lg shadow-lg">
             <iframe
               title="Localização Stilvoll"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=13.35%2C52.50%2C13.42%2C52.53&layer=mapnik&marker=52.515%2C13.385"
-              className="w-full h-full border-0 grayscale contrast-125"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3603.5!2d-49.2733!3d-25.4284!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDI1JzQyLjIiUyA0OcKwMTYnMjMuOSJX!5e0!3m2!1spt-BR!2sbr!4v1"
+              className="w-full h-full border-0"
               loading="lazy"
               allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
         </div>

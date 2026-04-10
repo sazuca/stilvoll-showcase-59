@@ -1,6 +1,6 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
-import { Star, X, ChevronDown } from "lucide-react";
+import { Star, X, ChevronDown, Check } from "lucide-react";
 
 import dishSauerbraten from "@/assets/dish-sauerbraten.jpg";
 import dishSchnitzel from "@/assets/dish-schnitzel.jpg";
@@ -8,22 +8,29 @@ import dishBlackforest from "@/assets/dish-blackforest.jpg";
 import dishRouladen from "@/assets/dish-rouladen.jpg";
 import dishPretzel from "@/assets/dish-pretzel.jpg";
 import dishSpargel from "@/assets/dish-spargel.jpg";
+import dishMaultaschen from "@/assets/dish-maultaschen.jpg";
+import dishCurrywurst from "@/assets/dish-currywurst.jpg";
+import dishKartoffelsalat from "@/assets/dish-kartoffelsalat.jpg";
+import dishEisbein from "@/assets/dish-eisbein.jpg";
 
-const featuredDishes = [
-  { name: "Sauerbraten Noir", price: "€48", rating: 4.9, image: dishSauerbraten, description: "Marinado por 7 dias em vinagre balsâmico e especiarias da Floresta Negra, servido sobre purê de repolho roxo e jus concentrado.", chef: "Klaus Volk" },
-  { name: "Schnitzel Contemporain", price: "€42", rating: 4.8, image: dishSchnitzel, description: "Vitela premium empanada à mão, espuma de limão siciliano, microgreens orgânicos e azeite de trufa branca.", chef: "Klaus Volk" },
-  { name: "Spargel Royale", price: "€38", rating: 4.9, image: dishSpargel, description: "Aspargos brancos da temporada com hollandaise espumante, flores comestíveis e ervilhas frescas do jardim.", chef: "Elara Fischer" },
-  { name: "Rouladen Klassik", price: "€45", rating: 4.7, image: dishRouladen, description: "Roulade de carne bovina recheada com mostarda, pickle e bacon, acompanhada de Kartoffelknödel e molho demi-glace.", chef: "Klaus Volk" },
-  { name: "Brezel Trüffel", price: "€22", rating: 4.8, image: dishPretzel, description: "Pretzel artesanal com manteiga de trufa negra do Périgord e cristais de flor de sal da Bretanha.", chef: "Elara Fischer" },
-  { name: "Schwarzwald Deconstructed", price: "€28", rating: 5.0, image: dishBlackforest, description: "Floresta Negra reimaginada: bolo de chocolate 70%, gel de cereja griotte, shards de chocolate e quenelle de creme fresco.", chef: "Elara Fischer" },
+export const featuredDishes = [
+  { name: "Sauerbraten Noir", price: "€48", priceNum: 48, rating: 4.9, image: dishSauerbraten, description: "Marinado por 7 dias em vinagre balsâmico e especiarias da Floresta Negra, servido sobre purê de repolho roxo e jus concentrado.", chef: "Klaus Volk" },
+  { name: "Schnitzel Contemporain", price: "€42", priceNum: 42, rating: 4.8, image: dishSchnitzel, description: "Vitela premium empanada à mão, espuma de limão siciliano, microgreens orgânicos e azeite de trufa branca.", chef: "Klaus Volk" },
+  { name: "Spargel Royale", price: "€38", priceNum: 38, rating: 4.9, image: dishSpargel, description: "Aspargos brancos da temporada com hollandaise espumante, flores comestíveis e ervilhas frescas do jardim.", chef: "Elara Fischer" },
+  { name: "Rouladen Klassik", price: "€45", priceNum: 45, rating: 4.7, image: dishRouladen, description: "Roulade de carne bovina recheada com mostarda, pickle e bacon, acompanhada de Kartoffelknödel e molho demi-glace.", chef: "Klaus Volk" },
+  { name: "Brezel Trüffel", price: "€22", priceNum: 22, rating: 4.8, image: dishPretzel, description: "Pretzel artesanal com manteiga de trufa negra do Périgord e cristais de flor de sal da Bretanha.", chef: "Elara Fischer" },
+  { name: "Schwarzwald Deconstructed", price: "€28", priceNum: 28, rating: 5.0, image: dishBlackforest, description: "Floresta Negra reimaginada: bolo de chocolate 70%, gel de cereja griotte, shards de chocolate e quenelle de creme fresco.", chef: "Elara Fischer" },
 ];
 
-const accordionDishes = [
-  { name: "Kartoffelsuppe Imperial", price: "€26", rating: 4.7, image: dishSauerbraten, description: "Sopa aveludada de batata com trufa branca, creme fraîche e cebolinha caramelizada. Uma tradição reinventada.", chef: "Hans Müller" },
-  { name: "Käsespätzle Deluxe", price: "€34", rating: 4.8, image: dishSchnitzel, description: "Spätzle artesanal com trio de queijos alpinos, cebola roxa crocante e redução de cerveja escura.", chef: "Sofia Wagner" },
-  { name: "Forelle Blau Moderniste", price: "€52", rating: 4.9, image: dishSpargel, description: "Truta do rio preparada na técnica clássica blau, com legumes baby, molho de manteiga marrom e amêndoas torradas.", chef: "Hans Müller" },
-  { name: "Zwiebelkuchen Noir", price: "€18", rating: 4.6, image: dishPretzel, description: "Torta rústica de cebola caramelizada com bacon defumado, noz-moscada e massa folhada artesanal.", chef: "Sofia Wagner" },
-  { name: "Eisbein Confit", price: "€56", rating: 4.9, image: dishRouladen, description: "Joelho de porco confitado por 12 horas, purê de ervilha, chucrute refinado e mostarda de grãos inteiros.", chef: "Klaus Volk" },
+export const accordionDishes = [
+  { name: "Kartoffelsuppe Imperial", price: "€26", priceNum: 26, rating: 4.7, image: dishSauerbraten, description: "Sopa aveludada de batata com trufa branca, creme fraîche e cebolinha caramelizada.", chef: "Hans Müller" },
+  { name: "Käsespätzle Deluxe", price: "€34", priceNum: 34, rating: 4.8, image: dishSchnitzel, description: "Spätzle artesanal com trio de queijos alpinos, cebola roxa crocante e redução de cerveja escura.", chef: "Sofia Wagner" },
+  { name: "Forelle Blau Moderniste", price: "€52", priceNum: 52, rating: 4.9, image: dishSpargel, description: "Truta do rio preparada na técnica clássica blau, com legumes baby e molho de manteiga marrom.", chef: "Hans Müller" },
+  { name: "Zwiebelkuchen Noir", price: "€18", priceNum: 18, rating: 4.6, image: dishPretzel, description: "Torta rústica de cebola caramelizada com bacon defumado, noz-moscada e massa folhada artesanal.", chef: "Sofia Wagner" },
+  { name: "Eisbein Confit", price: "€56", priceNum: 56, rating: 4.9, image: dishEisbein, description: "Joelho de porco confitado por 12 horas, purê de ervilha, chucrute refinado e mostarda de grãos inteiros.", chef: "Klaus Volk" },
+  { name: "Maultaschen Trüffel", price: "€36", priceNum: 36, rating: 4.8, image: dishMaultaschen, description: "Ravioli suábio recheado com carne e espinafre, caldo de carne cristalino e cebolinha frita.", chef: "Hans Müller" },
+  { name: "Currywurst Gourmet", price: "€24", priceNum: 24, rating: 4.7, image: dishCurrywurst, description: "Salsicha artesanal com molho de curry house-made, pó de curry defumado e batata frita em trufa.", chef: "Sofia Wagner" },
+  { name: "Kartoffelsalat Premium", price: "€20", priceNum: 20, rating: 4.6, image: dishKartoffelsalat, description: "Salada de batata bávara com vinagrete de mostarda, pepino, rabanete e ervas frescas do jardim.", chef: "Hans Müller" },
 ];
 
 const StarRating = ({ rating }: { rating: number }) => (
@@ -35,7 +42,7 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-interface DishType { name: string; price: string; rating: number; image: string; description: string; chef: string; }
+export interface DishType { name: string; price: string; priceNum: number; rating: number; image: string; description: string; chef: string; }
 
 const DishCard = ({ dish, index, onClick }: { dish: DishType; index: number; onClick: () => void }) => {
   const ref = useRef(null);
@@ -78,14 +85,17 @@ const DishDetail = ({ dish, onClose }: { dish: DishType; onClose: () => void }) 
   </motion.div>
 );
 
-const AccordionDish = ({ dish }: { dish: DishType }) => {
+const AccordionDish = ({ dish, onAdd, added }: { dish: DishType; onAdd?: (dish: DishType) => void; added?: boolean }) => {
   const [open, setOpen] = useState(false);
   return (
     <div className="border-b border-border">
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between py-5 text-left group">
-        <div className="flex items-center gap-4">
-          <h4 className="text-sm font-medium tracking-[0.1em] text-foreground group-hover:text-muted-foreground transition-colors">{dish.name}</h4>
-          <StarRating rating={dish.rating} />
+        <div className="flex items-center gap-3">
+          <img src={dish.image} alt={dish.name} className="w-10 h-10 object-cover rounded-sm flex-shrink-0" loading="lazy" width={40} height={40} />
+          <div>
+            <h4 className="text-sm font-medium tracking-[0.1em] text-foreground group-hover:text-muted-foreground transition-colors">{dish.name}</h4>
+            <div className="mt-0.5"><StarRating rating={dish.rating} /></div>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm font-light text-muted-foreground">{dish.price}</span>
@@ -97,9 +107,16 @@ const AccordionDish = ({ dish }: { dish: DishType }) => {
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.4, ease: "easeInOut" }} className="overflow-hidden">
             <div className="pb-6 flex gap-6">
               <img src={dish.image} alt={dish.name} className="w-32 h-32 object-cover flex-shrink-0" loading="lazy" width={128} height={128} />
-              <div>
+              <div className="flex-1">
                 <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2">por {dish.chef}</p>
-                <p className="text-sm font-light leading-relaxed text-muted-foreground">{dish.description}</p>
+                <p className="text-sm font-light leading-relaxed text-muted-foreground mb-3">{dish.description}</p>
+                {onAdd && (
+                  <button onClick={(e) => { e.stopPropagation(); onAdd(dish); }}
+                    className={`flex items-center gap-2 px-4 py-2 text-xs tracking-[0.15em] uppercase border transition-all duration-300 ${added ? "bg-foreground text-background border-foreground" : "border-border hover:border-foreground text-foreground"}`}>
+                    {added && <Check className="w-3 h-3" />}
+                    {added ? "Adicionado" : "Adicionar ao Pedido"}
+                  </button>
+                )}
               </div>
             </div>
           </motion.div>
@@ -148,3 +165,4 @@ const MenuGrid = () => {
 };
 
 export default MenuGrid;
+export { AccordionDish };
