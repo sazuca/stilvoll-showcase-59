@@ -10,6 +10,7 @@ interface CartItem {
   price: number;
   qty: number;
   type: "prato" | "bebida";
+  image: string;
 }
 
 interface DeliveryModalProps {
@@ -26,22 +27,20 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
   const [address, setAddress] = useState({ rua: "", numero: "", bairro: "", cidade: "", cep: "" });
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [payRef, setPayRef] = useState("");
 
-  const addToCart = (itemName: string, price: number, type: "prato" | "bebida") => {
+  const addToCart = (itemName: string, price: number, type: "prato" | "bebida", image: string) => {
     setCart(prev => ({
       ...prev,
-      [itemName]: { name: itemName, price, qty: (prev[itemName]?.qty || 0) + 1, type }
+      [itemName]: { name: itemName, price, qty: (prev[itemName]?.qty || 0) + 1, type, image }
     }));
   };
 
   const removeFromCart = (itemName: string) => {
     setCart(prev => {
       const c = { ...prev };
-      if (c[itemName] && c[itemName].qty > 1) {
-        c[itemName] = { ...c[itemName], qty: c[itemName].qty - 1 };
-      } else {
-        delete c[itemName];
-      }
+      if (c[itemName] && c[itemName].qty > 1) c[itemName] = { ...c[itemName], qty: c[itemName].qty - 1 };
+      else delete c[itemName];
       return c;
     });
   };
@@ -59,22 +58,27 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
     } else if (step === 3) {
       if (!address.rua || !address.numero || !address.cidade) { toast.error("Preencha o endereço completo."); return; }
       setStep(4);
+    } else if (step === 4) {
+      setStep(5);
       setTimeout(() => toast.success("Pedido realizado com sucesso!"), 500);
     }
   };
 
   const handleClose = () => {
     onClose();
-    setTimeout(() => { setStep(1); setCart({}); setAddress({ rua: "", numero: "", bairro: "", cidade: "", cep: "" }); setName(""); setPhone(""); }, 300);
+    setTimeout(() => { setStep(1); setCart({}); setAddress({ rua: "", numero: "", bairro: "", cidade: "", cep: "" }); setName(""); setPhone(""); setPayRef(""); }, 300);
   };
 
-  const ItemRow = ({ itemName, price, type }: { itemName: string; price: number; type: "prato" | "bebida" }) => {
+  const ItemRow = ({ itemName, price, type, image }: { itemName: string; price: number; type: "prato" | "bebida"; image: string }) => {
     const qty = cart[itemName]?.qty || 0;
     return (
       <div className="flex items-center justify-between py-2">
-        <span className="text-sm text-foreground font-light flex-1 truncate mr-3">{itemName}</span>
-        <span className="text-xs text-muted-foreground mr-3">€{price}</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <img src={image} alt={itemName} className="w-8 h-8 rounded-sm object-cover flex-shrink-0" loading="lazy" width={32} height={32} />
+          <span className="text-sm text-foreground font-light truncate">{itemName}</span>
+        </div>
+        <span className="text-xs text-muted-foreground mr-3 flex-shrink-0">€{price}</span>
+        <div className="flex items-center gap-2 flex-shrink-0">
           {qty > 0 && (
             <>
               <button onClick={() => removeFromCart(itemName)} className="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:border-foreground transition-colors">
@@ -83,13 +87,31 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
               <motion.span key={qty} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="text-sm w-4 text-center font-medium">{qty}</motion.span>
             </>
           )}
-          <button onClick={() => addToCart(itemName, price, type)} className="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:border-foreground transition-colors">
+          <button onClick={() => addToCart(itemName, price, type, image)} className="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:border-foreground transition-colors">
             <Plus className="w-3 h-3" />
           </button>
         </div>
       </div>
     );
   };
+
+  const ReceiptSummary = () => (
+    <div className="border border-border p-6 space-y-3">
+      <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">Resumo do Pedido</p>
+      {cartItems.map(item => (
+        <div key={item.name} className="flex items-center gap-3 py-1.5">
+          <img src={item.image} alt={item.name} className="w-8 h-8 rounded-sm object-cover flex-shrink-0" loading="lazy" width={32} height={32} />
+          <span className="text-sm font-light text-foreground flex-1 truncate">{item.name}</span>
+          <span className="text-xs text-muted-foreground">{item.qty}x</span>
+          <span className="text-sm text-foreground">€{(item.price * item.qty).toFixed(0)}</span>
+        </div>
+      ))}
+      <div className="border-t border-border pt-3 flex justify-between">
+        <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">Total</span>
+        <span className="text-lg font-light text-foreground">€{total.toFixed(0)}</span>
+      </div>
+    </div>
+  );
 
   return (
     <AnimatePresence>
@@ -105,13 +127,13 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
               <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-2">Stilvoll</p>
               <h3 className="text-2xl font-extralight tracking-[0.1em] text-foreground">Pedir em Casa</h3>
               <div className="flex justify-center gap-2 mt-4">
-                {[1, 2, 3, 4].map((s) => (
-                  <div key={s} className={`w-6 h-0.5 transition-colors ${step >= s ? "bg-foreground" : "bg-border"}`} />
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <div key={s} className={`w-5 h-0.5 transition-colors ${step >= s ? "bg-foreground" : "bg-border"}`} />
                 ))}
               </div>
             </div>
 
-            {step === 4 ? (
+            {step === 5 ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8">
                 <div className="w-12 h-12 rounded-full bg-foreground text-background flex items-center justify-center mx-auto mb-4">
                   <Check className="w-6 h-6" />
@@ -125,11 +147,11 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
               <div className="space-y-6">
                 <div>
                   <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">Pratos</p>
-                  {allDishes.map(d => <ItemRow key={d.name} itemName={d.name} price={d.priceNum} type="prato" />)}
+                  {allDishes.map(d => <ItemRow key={d.name} itemName={d.name} price={d.priceNum} type="prato" image={d.image} />)}
                 </div>
                 <div>
                   <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">Bebidas</p>
-                  {allDrinks.map(d => <ItemRow key={d.name} itemName={d.name} price={d.priceNum} type="bebida" />)}
+                  {allDrinks.map(d => <ItemRow key={d.name} itemName={d.name} price={d.priceNum} type="bebida" image={d.image} />)}
                 </div>
                 {cartItems.length > 0 && (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-4 border-t border-border">
@@ -139,9 +161,30 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
                     </div>
                   </motion.div>
                 )}
-                <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
-                  Próximo
-                </button>
+                <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">Próximo</button>
+              </div>
+            ) : step === 4 ? (
+              <div className="space-y-6">
+                <ReceiptSummary />
+                <div className="text-center">
+                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Escaneie para Pagar</p>
+                  <div className="w-40 h-40 mx-auto bg-foreground p-2.5 mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <rect fill="white" width="100" height="100"/>
+                      {[0,20,40,60,80].map(x => [0,20,40,60,80].map(y => (
+                        (x+y) % 40 !== 20 && <rect key={`${x}-${y}`} x={x+2} y={y+2} width="16" height="16" fill="black" rx="1"/>
+                      )))}
+                      <rect x="30" y="30" width="40" height="40" fill="white"/>
+                      <rect x="35" y="35" width="30" height="30" fill="black" rx="2"/>
+                      <rect x="40" y="40" width="20" height="20" fill="white" rx="1"/>
+                      <text x="50" y="53" textAnchor="middle" fontSize="8" fill="black" fontWeight="bold">S</text>
+                    </svg>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Stilvoll GmbH • Berlim</p>
+                </div>
+                <input type="text" placeholder="Nº de Referência do Pagamento" value={payRef} onChange={e => setPayRef(e.target.value)}
+                  className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
+                <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">Confirmar Pagamento</button>
               </div>
             ) : (
               <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
@@ -170,14 +213,9 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
                     </div>
                   </>
                 )}
-                <div className="pt-2 border-t border-border">
-                  <div className="flex justify-between text-sm mb-4">
-                    <span className="text-muted-foreground">{cartItems.reduce((s,i)=>s+i.qty,0)} itens</span>
-                    <span className="font-medium text-foreground">Total: €{total.toFixed(0)}</span>
-                  </div>
-                </div>
+                <ReceiptSummary />
                 <button type="submit" className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
-                  {step === 2 ? "Próximo" : "Confirmar Pedido"}
+                  {step === 2 ? "Próximo" : "Ir para Pagamento"}
                 </button>
               </form>
             )}

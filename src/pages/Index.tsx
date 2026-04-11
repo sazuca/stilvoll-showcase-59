@@ -7,6 +7,7 @@ import MenuGrid from "@/components/MenuGrid";
 import DrinksSection from "@/components/DrinksSection";
 import ChefsSection from "@/components/ChefsSection";
 import ReservationSection from "@/components/ReservationSection";
+import ReviewsSection from "@/components/ReviewsSection";
 import DeliveryModal from "@/components/DeliveryModal";
 import ContactSection from "@/components/ContactSection";
 import SiteFooter from "@/components/SiteFooter";
@@ -32,6 +33,7 @@ const Index = () => {
       <DrinksSection />
       <ChefsSection />
       <ReservationSection />
+      <ReviewsSection />
       <ContactSection />
       <SiteFooter />
       <DeliveryModal isOpen={deliveryOpen} onClose={() => setDeliveryOpen(false)} />

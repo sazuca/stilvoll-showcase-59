@@ -1,15 +1,64 @@
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 
+import tableJanela from "@/assets/table-janela.jpg";
+import tableJardim from "@/assets/table-jardim.jpg";
+import tablePrivativo from "@/assets/table-privativo.jpg";
+import tableBalcao from "@/assets/table-balcao.jpg";
+import tableSalao from "@/assets/table-salao.jpg";
+
 const tables = [
-  { id: "janela", label: "Janela", desc: "Vista panorâmica" },
-  { id: "jardim", label: "Jardim", desc: "Ao ar livre" },
-  { id: "privativo", label: "Privativo", desc: "Sala exclusiva" },
-  { id: "balcao", label: "Balcão do Chef", desc: "Experiência imersiva" },
-  { id: "salao", label: "Salão Principal", desc: "Ambiente clássico" },
+  { id: "janela", label: "Janela", desc: "Vista panorâmica", image: tableJanela },
+  { id: "jardim", label: "Jardim", desc: "Ao ar livre", image: tableJardim },
+  { id: "privativo", label: "Privativo", desc: "Sala exclusiva", image: tablePrivativo },
+  { id: "balcao", label: "Balcão do Chef", desc: "Experiência imersiva", image: tableBalcao },
+  { id: "salao", label: "Salão Principal", desc: "Ambiente clássico", image: tableSalao },
 ];
+
+const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose: () => void; onConfirm: () => void }) => {
+  const [ref, setRef] = useState("");
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 backdrop-blur-sm p-4" onClick={onClose}>
+      <motion.div initial={{ opacity: 0, y: 30, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30 }}
+        className="bg-background max-w-md w-full p-8 md:p-10 relative" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors"><X className="w-4 h-4" /></button>
+        <div className="text-center mb-8">
+          <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-2">Pagamento</p>
+          <h3 className="text-2xl font-extralight tracking-[0.1em] text-foreground">Checkout</h3>
+        </div>
+        <div className="text-center mb-8">
+          <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Escaneie o QR Code</p>
+          <div className="w-48 h-48 mx-auto bg-foreground p-3 mb-4">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <rect fill="white" width="100" height="100"/>
+              {[0,20,40,60,80].map(x => [0,20,40,60,80].map(y => (
+                (x+y) % 40 !== 20 && <rect key={`${x}-${y}`} x={x+2} y={y+2} width="16" height="16" fill="black" rx="1"/>
+              )))}
+              <rect x="30" y="30" width="40" height="40" fill="white"/>
+              <rect x="35" y="35" width="30" height="30" fill="black" rx="2"/>
+              <rect x="40" y="40" width="20" height="20" fill="white" rx="1"/>
+              <text x="50" y="53" textAnchor="middle" fontSize="8" fill="black" fontWeight="bold">S</text>
+            </svg>
+          </div>
+          <p className="text-xs text-muted-foreground">Stilvoll GmbH • Berlim</p>
+        </div>
+        <div className="border-t border-border pt-6 space-y-4">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Valor</span>
+            <span className="font-medium text-foreground">{total}</span>
+          </div>
+          <input type="text" placeholder="Nº de Referência do Pagamento" value={ref} onChange={e => setRef(e.target.value)}
+            className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
+          <button onClick={onConfirm} className="w-full py-4 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
+            Confirmar Pagamento
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const ReservationSection = () => {
   const ref = useRef(null);
@@ -20,19 +69,19 @@ const ReservationSection = () => {
   const [time, setTime] = useState("");
   const [payment, setPayment] = useState("local");
   const [name, setName] = useState("");
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const availableHours = useMemo(() => {
     if (!date) return [];
     const d = new Date(date + "T00:00:00");
-    const day = d.getDay(); // 0=Sun, 6=Sat
+    const day = d.getDay();
     const isWeekend = day === 0 || day === 6;
     const startHour = isWeekend ? 19 : 18;
     const endHour = isWeekend ? 23 : 24;
     const hours: string[] = [];
     for (let h = startHour; h < endHour; h++) {
-      const hh = h.toString().padStart(2, "0");
-      hours.push(`${hh}:00`);
-      hours.push(`${hh}:30`);
+      hours.push(`${h.toString().padStart(2, "0")}:00`);
+      hours.push(`${h.toString().padStart(2, "0")}:30`);
     }
     return hours;
   }, [date]);
@@ -43,68 +92,98 @@ const ReservationSection = () => {
       toast.error("Por favor, preencha todos os campos.");
       return;
     }
-    toast.success(`Reserva confirmada para ${name}! Mesa: ${tables.find(t => t.id === selectedTable)?.label}, ${guests} pessoa(s), ${date} às ${time}.`);
+    if (payment === "online") {
+      setShowCheckout(true);
+    } else {
+      toast.success(`Reserva confirmada para ${name}! Mesa: ${tables.find(t => t.id === selectedTable)?.label}, ${guests} pessoa(s), ${date} às ${time}.`);
+    }
   };
 
+  const selectedTableData = tables.find(t => t.id === selectedTable);
+
   return (
-    <section id="reserva" className="py-32 px-6">
-      <div className="max-w-4xl mx-auto">
-        <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-16">
-          <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-4">Reserve Sua Experiência</p>
-          <h2 className="text-3xl md:text-5xl font-extralight tracking-[0.1em] text-foreground">Reserva</h2>
-          <p className="text-xs text-muted-foreground mt-4 font-light">Seg–Sex: 18h às 00h &nbsp;|&nbsp; Sáb–Dom: 19h às 23h</p>
-        </motion.div>
+    <>
+      <section id="reserva" className="py-32 px-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-16">
+            <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-4">Reserve Sua Experiência</p>
+            <h2 className="text-3xl md:text-5xl font-extralight tracking-[0.1em] text-foreground">Reserva</h2>
+            <p className="text-xs text-muted-foreground mt-4 font-light">Seg–Sex: 18h às 00h &nbsp;|&nbsp; Sáb–Dom: 19h às 23h</p>
+          </motion.div>
 
-        <form onSubmit={handleReserve} className="max-w-2xl mx-auto space-y-10">
-          <div>
-            <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Posição da Mesa</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {tables.map((table) => (
-                <button type="button" key={table.id} onClick={() => setSelectedTable(table.id)}
-                  className={`p-4 border text-left transition-all duration-300 ${selectedTable === table.id ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30"}`}>
-                  <p className="text-sm font-medium">{table.label}</p>
-                  <p className={`text-xs mt-1 ${selectedTable === table.id ? "text-background/60" : "text-muted-foreground"}`}>{table.desc}</p>
-                </button>
-              ))}
+          <form onSubmit={handleReserve} className="max-w-2xl mx-auto space-y-10">
+            <div>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Posição da Mesa</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {tables.map((table) => (
+                  <button type="button" key={table.id} onClick={() => setSelectedTable(table.id)}
+                    className={`relative overflow-hidden text-left transition-all duration-300 group ${selectedTable === table.id ? "ring-2 ring-foreground" : "ring-1 ring-border hover:ring-foreground/30"}`}>
+                    <img src={table.image} alt={table.label} className="w-full h-24 object-cover" loading="lazy" width={400} height={200} />
+                    <div className={`p-3 transition-colors ${selectedTable === table.id ? "bg-foreground text-background" : "bg-background"}`}>
+                      <p className="text-sm font-medium">{table.label}</p>
+                      <p className={`text-xs mt-0.5 ${selectedTable === table.id ? "text-background/60" : "text-muted-foreground"}`}>{table.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <AnimatePresence>
+                {selectedTableData && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mt-4">
+                    <img src={selectedTableData.image} alt={selectedTableData.label} className="w-full h-48 md:h-64 object-cover rounded" loading="lazy" width={800} height={400} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <input type="text" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-            <select value={guests} onChange={(e) => setGuests(e.target.value)}
-              className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors">
-              {[1,2,3,4,5,6,7,8,10,12].map(n => <option key={n} value={n}>{n} {n === 1 ? "pessoa" : "pessoas"}</option>)}
-            </select>
-            <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(""); }}
-              className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors" />
-            <select value={time} onChange={(e) => setTime(e.target.value)} disabled={!date}
-              className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors disabled:opacity-40">
-              <option value="">{date ? "Selecione o horário" : "Selecione a data primeiro"}</option>
-              {availableHours.map(h => <option key={h} value={h}>{h}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Forma de Pagamento</p>
-            <div className="flex gap-4">
-              {[{ id: "local", label: "No Local" }, { id: "online", label: "Online" }].map((opt) => (
-                <button type="button" key={opt.id} onClick={() => setPayment(opt.id)}
-                  className={`flex items-center gap-2 px-6 py-3 border text-xs tracking-[0.15em] uppercase transition-all duration-300 ${payment === opt.id ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30 text-foreground"}`}>
-                  {payment === opt.id && <Check className="w-3 h-3" />}
-                  {opt.label}
-                </button>
-              ))}
+            <div className="grid md:grid-cols-2 gap-6">
+              <input type="text" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)}
+                className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
+              <select value={guests} onChange={(e) => setGuests(e.target.value)}
+                className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors">
+                {[1,2,3,4,5,6,7,8,10,12].map(n => <option key={n} value={n}>{n} {n === 1 ? "pessoa" : "pessoas"}</option>)}
+              </select>
+              <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(""); }}
+                className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors" />
+              <select value={time} onChange={(e) => setTime(e.target.value)} disabled={!date}
+                className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors disabled:opacity-40">
+                <option value="">{date ? "Selecione o horário" : "Selecione a data primeiro"}</option>
+                {availableHours.map(h => <option key={h} value={h}>{h}</option>)}
+              </select>
             </div>
-          </div>
 
-          <button type="submit"
-            className="w-full py-4 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
-            Confirmar Reserva
-          </button>
-        </form>
-      </div>
-    </section>
+            <div>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Forma de Pagamento</p>
+              <div className="flex gap-4">
+                {[{ id: "local", label: "No Local" }, { id: "online", label: "Online" }].map((opt) => (
+                  <button type="button" key={opt.id} onClick={() => setPayment(opt.id)}
+                    className={`flex items-center gap-2 px-6 py-3 border text-xs tracking-[0.15em] uppercase transition-all duration-300 ${payment === opt.id ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30 text-foreground"}`}>
+                    {payment === opt.id && <Check className="w-3 h-3" />}
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button type="submit" className="w-full py-4 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
+              Confirmar Reserva
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <AnimatePresence>
+        {showCheckout && (
+          <PaymentCheckout
+            total="€50"
+            onClose={() => setShowCheckout(false)}
+            onConfirm={() => {
+              setShowCheckout(false);
+              toast.success(`Reserva confirmada para ${name}! Pagamento recebido.`);
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
