@@ -1,7 +1,15 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import heroImage from "@/assets/hero.jpg";
 
 const HeroSection = () => {
+  const { scrollY } = useScroll();
+
+  // Title interpolation: large centered → small top-left in header
+  const titleScale = useTransform(scrollY, [0, 300], [1, 0.28]);
+  const titleY = useTransform(scrollY, [0, 300], [0, -window.innerHeight * 0.42 + 32]);
+  const titleX = useTransform(scrollY, [0, 300], [0, -window.innerWidth * 0.35]);
+  const titleOpacity = useTransform(scrollY, [250, 300], [1, 0]);
+
   return (
     <section className="relative h-screen overflow-hidden">
       <motion.div
@@ -19,10 +27,17 @@ const HeroSection = () => {
           className="text-background/60 text-xs tracking-[0.5em] uppercase mb-6">
           Berlim · Desde 1987
         </motion.p>
-        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-5xl md:text-8xl font-extralight tracking-[0.2em] text-background mb-6">
+
+        <motion.h1
+          style={{ scale: titleScale, y: titleY, x: titleX, opacity: titleOpacity }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="text-5xl md:text-8xl font-extralight tracking-[0.2em] text-background mb-6 will-change-transform"
+        >
           STILVOLL
         </motion.h1>
+
         <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1, delay: 0.9, ease: "easeInOut" }}
           className="h-px bg-background/30 w-24 mb-6" />
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }}
