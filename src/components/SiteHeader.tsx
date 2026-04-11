@@ -14,6 +14,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
     { label: "Bebidas", id: "bebidas" },
     { label: "Chefs", id: "chefs" },
     { label: "Reserva", id: "reserva" },
+    { label: "Avaliações", id: "avaliacoes" },
     { label: "Contato", id: "contato" },
   ];
 

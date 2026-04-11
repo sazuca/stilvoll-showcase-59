@@ -5,7 +5,8 @@ const SiteFooter = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="text-center md:text-left">
             <p className="text-sm font-light tracking-[0.25em] text-foreground mb-2">STILVOLL</p>
-            <p className="text-xs text-muted-foreground font-light">Allee der Sterne, nº 1010, Vila Germânica</p>
+            <p className="text-xs text-muted-foreground font-light">Unter den Linden, 42 — Berlim, Alemanha</p>
+            <p className="text-xs text-muted-foreground font-light mt-1">3 unidades: Mitte · Charlottenburg · Friedrichshain</p>
           </div>
           <div className="text-center md:text-right space-y-1">
             <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2">Horário de Funcionamento</p>
