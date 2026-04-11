@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 interface SiteHeaderProps {
@@ -8,6 +8,13 @@ interface SiteHeaderProps {
 
 const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { scrollY } = useScroll();
+
+  // Header appears after scroll past hero
+  const headerOpacity = useTransform(scrollY, [200, 350], [0, 1]);
+  const headerY = useTransform(scrollY, [200, 350], [-20, 0]);
+  const logoOpacity = useTransform(scrollY, [280, 350], [0, 1]);
+  const navOpacity = useTransform(scrollY, [300, 400], [0, 1]);
 
   const navItems = [
     { label: "Cardápio", id: "cardapio" },
@@ -25,17 +32,19 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50"
+      style={{ opacity: headerOpacity, y: headerY }}
+      className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/50"
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="text-lg font-light tracking-[0.25em] text-foreground">
+        <motion.button
+          style={{ opacity: logoOpacity }}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="text-lg font-light tracking-[0.25em] text-foreground"
+        >
           STILVOLL
-        </button>
+        </motion.button>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <motion.nav style={{ opacity: navOpacity }} className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -51,13 +60,13 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
           >
             Pedir em Casa
           </button>
-        </nav>
+        </motion.nav>
 
-        <div className="flex md:hidden items-center gap-2">
+        <motion.div style={{ opacity: navOpacity }} className="flex md:hidden items-center gap-2">
           <button onClick={() => setMenuOpen(!menuOpen)} className="p-2">
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-        </div>
+        </motion.div>
       </div>
 
       {menuOpen && (
