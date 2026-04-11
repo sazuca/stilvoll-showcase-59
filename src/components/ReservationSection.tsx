@@ -1,5 +1,5 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -8,6 +8,16 @@ import tableJardim from "@/assets/table-jardim.jpg";
 import tablePrivativo from "@/assets/table-privativo.jpg";
 import tableBalcao from "@/assets/table-balcao.jpg";
 import tableSalao from "@/assets/table-salao.jpg";
+
+import mitteFacade from "@/assets/unit-mitte-facade.jpg";
+import charlottenburgFacade from "@/assets/unit-charlottenburg-facade.jpg";
+import friedrichshainFacade from "@/assets/unit-friedrichshain-facade.jpg";
+
+const unitOptions = [
+  { id: "mitte", label: "Stilvoll Mitte", desc: "O Epítome do Luxo", image: mitteFacade },
+  { id: "charlottenburg", label: "Stilvoll Charlottenburg", desc: "Experiência Histórica", image: charlottenburgFacade },
+  { id: "friedrichshain", label: "Stilvoll Friedrichshain", desc: "Ao Ar Livre", image: friedrichshainFacade },
+];
 
 const tables = [
   { id: "janela", label: "Janela", desc: "Vista panorâmica", image: tableJanela },
@@ -60,9 +70,14 @@ const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose
   );
 };
 
-const ReservationSection = () => {
+interface ReservationSectionProps {
+  preselectedUnit?: string;
+}
+
+const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [selectedUnit, setSelectedUnit] = useState(preselectedUnit || "");
   const [selectedTable, setSelectedTable] = useState("");
   const [guests, setGuests] = useState("2");
   const [date, setDate] = useState("");
@@ -70,6 +85,10 @@ const ReservationSection = () => {
   const [payment, setPayment] = useState("local");
   const [name, setName] = useState("");
   const [showCheckout, setShowCheckout] = useState(false);
+
+  useEffect(() => {
+    if (preselectedUnit) setSelectedUnit(preselectedUnit);
+  }, [preselectedUnit]);
 
   const availableHours = useMemo(() => {
     if (!date) return [];
@@ -88,17 +107,19 @@ const ReservationSection = () => {
 
   const handleReserve = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTable || !date || !time || !name) {
+    if (!selectedUnit || !selectedTable || !date || !time || !name) {
       toast.error("Por favor, preencha todos os campos.");
       return;
     }
     if (payment === "online") {
       setShowCheckout(true);
     } else {
-      toast.success(`Reserva confirmada para ${name}! Mesa: ${tables.find(t => t.id === selectedTable)?.label}, ${guests} pessoa(s), ${date} às ${time}.`);
+      const unitLabel = unitOptions.find(u => u.id === selectedUnit)?.label;
+      toast.success(`Reserva confirmada para ${name}! ${unitLabel}, Mesa: ${tables.find(t => t.id === selectedTable)?.label}, ${guests} pessoa(s), ${date} às ${time}.`);
     }
   };
 
+  const selectedUnitData = unitOptions.find(u => u.id === selectedUnit);
   const selectedTableData = tables.find(t => t.id === selectedTable);
 
   return (
@@ -112,6 +133,31 @@ const ReservationSection = () => {
           </motion.div>
 
           <form onSubmit={handleReserve} className="max-w-2xl mx-auto space-y-10">
+            {/* Unit Selection */}
+            <div>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Em qual unidade deseja viver sua experiência?</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {unitOptions.map((unit) => (
+                  <button type="button" key={unit.id} onClick={() => setSelectedUnit(unit.id)}
+                    className={`relative overflow-hidden text-left transition-all duration-300 group ${selectedUnit === unit.id ? "ring-2 ring-foreground" : "ring-1 ring-border hover:ring-foreground/30"}`}>
+                    <img src={unit.image} alt={unit.label} className="w-full h-28 object-cover" loading="lazy" width={896} height={512} />
+                    <div className={`p-3 transition-colors ${selectedUnit === unit.id ? "bg-foreground text-background" : "bg-background"}`}>
+                      <p className="text-sm font-medium">{unit.label}</p>
+                      <p className={`text-xs mt-0.5 ${selectedUnit === unit.id ? "text-background/60" : "text-muted-foreground"}`}>{unit.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <AnimatePresence>
+                {selectedUnitData && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mt-4">
+                    <img src={selectedUnitData.image} alt={selectedUnitData.label} className="w-full h-48 md:h-56 object-cover" loading="lazy" width={896} height={512} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Table Selection */}
             <div>
               <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Posição da Mesa</p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
