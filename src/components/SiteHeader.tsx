@@ -22,7 +22,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
     { label: "Chefs", id: "chefs" },
     { label: "Reserva", id: "reserva" },
     { label: "Avaliações", id: "avaliacoes" },
-    { label: "Contato", id: "contato" },
+    { label: "Nossas Unidades", id: "contato" },
   ];
 
   const scrollTo = (id: string) => {
