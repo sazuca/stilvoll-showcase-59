@@ -1,7 +1,12 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Check, X } from "lucide-react";
+import { Check, X, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 import tableJanela from "@/assets/table-janela.jpg";
 import tableJardim from "@/assets/table-jardim.jpg";
@@ -26,6 +31,9 @@ const tables = [
   { id: "balcao", label: "Balcão do Chef", desc: "Experiência imersiva", image: tableBalcao },
   { id: "salao", label: "Salão Principal", desc: "Ambiente clássico", image: tableSalao },
 ];
+
+// Simulate some unavailable time slots
+const unavailableSlots = new Set(["19:00", "20:30", "21:00"]);
 
 const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose: () => void; onConfirm: () => void }) => {
   const [ref, setRef] = useState("");
@@ -75,12 +83,12 @@ interface ReservationSectionProps {
 }
 
 const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const sectionRef = useRef(null);
+  const inView = useInView(sectionRef, { once: true, margin: "-100px" });
   const [selectedUnit, setSelectedUnit] = useState(preselectedUnit || "");
   const [selectedTable, setSelectedTable] = useState("");
   const [guests, setGuests] = useState("2");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("");
   const [payment, setPayment] = useState("local");
   const [name, setName] = useState("");
@@ -92,8 +100,7 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
 
   const availableHours = useMemo(() => {
     if (!date) return [];
-    const d = new Date(date + "T00:00:00");
-    const day = d.getDay();
+    const day = date.getDay();
     const isWeekend = day === 0 || day === 6;
     const startHour = isWeekend ? 19 : 18;
     const endHour = isWeekend ? 23 : 24;
@@ -115,7 +122,7 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
       setShowCheckout(true);
     } else {
       const unitLabel = unitOptions.find(u => u.id === selectedUnit)?.label;
-      toast.success(`Reserva confirmada para ${name}! ${unitLabel}, Mesa: ${tables.find(t => t.id === selectedTable)?.label}, ${guests} pessoa(s), ${date} às ${time}.`);
+      toast.success(`Reserva confirmada para ${name}! ${unitLabel}, Mesa: ${tables.find(t => t.id === selectedTable)?.label}, ${guests} pessoa(s), ${format(date, "dd/MM/yyyy")} às ${time}.`);
     }
   };
 
@@ -126,7 +133,7 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
     <>
       <section id="reserva" className="py-32 px-6">
         <div className="max-w-4xl mx-auto">
-          <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-16">
+          <motion.div ref={sectionRef} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-16">
             <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-4">Reserve Sua Experiência</p>
             <h2 className="text-3xl md:text-5xl font-extralight tracking-[0.1em] text-foreground">Reserva</h2>
             <p className="text-xs text-muted-foreground mt-4 font-light">Seg–Sex: 18h às 00h &nbsp;|&nbsp; Sáb–Dom: 19h às 23h</p>
@@ -181,6 +188,7 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
               </AnimatePresence>
             </div>
 
+            {/* Name & Guests */}
             <div className="grid md:grid-cols-2 gap-6">
               <input type="text" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)}
                 className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
@@ -188,14 +196,67 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
                 className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors">
                 {[1,2,3,4,5,6,7,8,10,12].map(n => <option key={n} value={n}>{n} {n === 1 ? "pessoa" : "pessoas"}</option>)}
               </select>
-              <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(""); }}
-                className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors" />
-              <select value={time} onChange={(e) => setTime(e.target.value)} disabled={!date}
-                className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors disabled:opacity-40">
-                <option value="">{date ? "Selecione o horário" : "Selecione a data primeiro"}</option>
-                {availableHours.map(h => <option key={h} value={h}>{h}</option>)}
-              </select>
             </div>
+
+            {/* Date Picker */}
+            <div>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Data</p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button type="button"
+                    className={cn(
+                      "w-full flex items-center gap-3 border-b border-border py-3 text-sm text-left transition-colors focus:outline-none focus:border-foreground",
+                      !date && "text-muted-foreground"
+                    )}>
+                    <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                    {date ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione a data"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(d) => { setDate(d); setTime(""); }}
+                    disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))}
+                    locale={ptBR}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Time Slot Pills */}
+            {date && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Horário</p>
+                <div className="flex flex-wrap gap-2">
+                  {availableHours.map(h => {
+                    const disabled = unavailableSlots.has(h);
+                    const selected = time === h;
+                    return (
+                      <button
+                        type="button"
+                        key={h}
+                        disabled={disabled}
+                        onClick={() => !disabled && setTime(h)}
+                        className={cn(
+                          "px-4 py-2 text-xs tracking-wider border rounded-full transition-all duration-200",
+                          selected
+                            ? "bg-foreground text-background border-foreground"
+                            : disabled
+                              ? "border-border/50 text-muted-foreground/30 cursor-not-allowed"
+                              : "border-border text-foreground hover:border-foreground/50"
+                        )}
+                      >
+                        {h}
+                        {disabled && <span className="ml-1 text-[9px] opacity-50">lotado</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
 
             <div>
               <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Forma de Pagamento</p>
