@@ -1,10 +1,19 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import heroImage from "@/assets/hero.jpg";
 
+const GermanyFlag = () => (
+  <span className="inline-flex items-center align-middle mx-2" style={{ height: "1em", width: "1.4em" }}>
+    <svg viewBox="0 0 5 3" className="w-full h-full rounded-sm shadow-sm">
+      <rect width="5" height="1" y="0" fill="#000" />
+      <rect width="5" height="1" y="1" fill="#D00" />
+      <rect width="5" height="1" y="2" fill="#FFCE00" />
+    </svg>
+  </span>
+);
+
 const HeroSection = () => {
   const { scrollY } = useScroll();
 
-  // Title interpolation: large centered → small top-left in header
   const titleScale = useTransform(scrollY, [0, 300], [1, 0.28]);
   const titleY = useTransform(scrollY, [0, 300], [0, -window.innerHeight * 0.42 + 32]);
   const titleX = useTransform(scrollY, [0, 300], [0, -window.innerWidth * 0.35]);
@@ -24,8 +33,8 @@ const HeroSection = () => {
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-6">
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-background/60 text-xs tracking-[0.5em] uppercase mb-6">
-          Berlim · Desde 1987
+          className="text-background/60 text-xs tracking-[0.5em] uppercase mb-6 flex items-center justify-center">
+          Berlim <GermanyFlag /> Desde 1987
         </motion.p>
 
         <motion.h1

@@ -18,11 +18,12 @@ const ContactSection = () => {
   const [popup, setPopup] = useState<number | null>(null);
   const unit = units[active];
 
-  // Pin positions relative to the map container (approximate for Berlin map area)
+  const mapSrc = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d5000!2d${unit.lng}!3d${unit.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1spt-BR!2sde!4v1`;
+
   const pinPositions = [
-    { left: "52%", top: "42%" },   // Mitte
-    { left: "28%", top: "52%" },   // Charlottenburg
-    { left: "72%", top: "46%" },   // Friedrichshain
+    { left: "52%", top: "42%" },
+    { left: "28%", top: "52%" },
+    { left: "72%", top: "46%" },
   ];
 
   return (
@@ -45,12 +46,22 @@ const ContactSection = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-start">
+          {/* Address info with animation */}
           <div className="space-y-8">
-            <div>
-              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">Endereço</p>
-              <p className="text-sm font-light text-foreground">{unit.address}</p>
-              <p className="text-sm font-light text-foreground">Berlim, Alemanha</p>
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div key={active} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.3 }}>
+                <div>
+                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">Unidade</p>
+                  <p className="text-lg font-light tracking-wide text-foreground">{unit.name}</p>
+                  {unit.tag && <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">{unit.tag}</span>}
+                </div>
+                <div className="mt-6">
+                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">Endereço</p>
+                  <p className="text-sm font-light text-foreground">{unit.address}</p>
+                  <p className="text-sm font-light text-foreground">Berlim, Alemanha</p>
+                </div>
+              </motion.div>
+            </AnimatePresence>
             <div>
               <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">Telefone</p>
               <a href="tel:+493012345678" className="text-sm font-light text-foreground hover:text-muted-foreground transition-colors">+49 30 1234 5678</a>
@@ -66,16 +77,23 @@ const ContactSection = () => {
             </div>
           </div>
 
+          {/* Map with dynamic center */}
           <div className="w-full h-80 md:h-96 overflow-hidden rounded-lg shadow-lg relative">
-            <iframe
-              key={active}
-              title={`Localização ${unit.name}`}
-              src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d80000!2d13.38!3d52.52!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1spt-BR!2sde!4v1`}
-              className="w-full h-full border-0"
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+            <AnimatePresence mode="wait">
+              <motion.iframe
+                key={active}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                title={`Localização ${unit.name}`}
+                src={mapSrc}
+                className="w-full h-full border-0"
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </AnimatePresence>
             {/* Custom pins overlay */}
             {units.map((u, i) => (
               <div key={u.name} className="absolute" style={{ left: pinPositions[i].left, top: pinPositions[i].top, transform: "translate(-50%, -100%)" }}>
