@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { X, Check, Minus, Plus, ShoppingBag } from "lucide-react";
+import { useState, useCallback } from "react";
+import { X, Check, Minus, Plus, ShoppingBag, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { featuredDishes, accordionDishes, type DishType } from "./MenuGrid";
 import { drinkCategories, type DrinkItem } from "./DrinksSection";
@@ -24,7 +24,22 @@ const allDrinks: DrinkItem[] = drinkCategories.flatMap(c => c.items);
 const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
   const [step, setStep] = useState(1);
   const [cart, setCart] = useState<Record<string, CartItem>>({});
-  const [address, setAddress] = useState({ rua: "", numero: "", bairro: "", cidade: "", cep: "" });
+  const [address, setAddress] = useState({ rua: "", numero: "", bairro: "", cidade: "", estado: "", cep: "" });
+  const [cepLoading, setCepLoading] = useState(false);
+
+  const fetchCep = useCallback(async (cep: string) => {
+    const clean = cep.replace(/\D/g, "");
+    if (clean.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setAddress(prev => ({ ...prev, rua: data.logradouro || prev.rua, bairro: data.bairro || prev.bairro, cidade: data.localidade || prev.cidade, estado: data.uf || prev.estado }));
+      }
+    } catch { /* silently fail */ }
+    setCepLoading(false);
+  }, []);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [payRef, setPayRef] = useState("");
@@ -66,7 +81,7 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
 
   const handleClose = () => {
     onClose();
-    setTimeout(() => { setStep(1); setCart({}); setAddress({ rua: "", numero: "", bairro: "", cidade: "", cep: "" }); setName(""); setPhone(""); setPayRef(""); }, 300);
+    setTimeout(() => { setStep(1); setCart({}); setAddress({ rua: "", numero: "", bairro: "", cidade: "", estado: "", cep: "" }); setName(""); setPhone(""); setPayRef(""); }, 300);
   };
 
   const ItemRow = ({ itemName, price, type, image }: { itemName: string; price: number; type: "prato" | "bebida"; image: string }) => {
@@ -197,6 +212,16 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
                   </>
                 ) : (
                   <>
+                    <div className="relative">
+                      <input type="text" placeholder="CEP" value={address.cep}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setAddress(prev => ({ ...prev, cep: val }));
+                          fetchCep(val);
+                        }}
+                        className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
+                      {cepLoading && <Loader2 className="w-4 h-4 animate-spin absolute right-0 top-3.5 text-muted-foreground" />}
+                    </div>
                     <input type="text" placeholder="Rua" value={address.rua} onChange={(e) => setAddress({ ...address, rua: e.target.value })}
                       className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
                     <div className="grid grid-cols-2 gap-4">
@@ -205,10 +230,10 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
                       <input type="text" placeholder="Bairro" value={address.bairro} onChange={(e) => setAddress({ ...address, bairro: e.target.value })}
                         className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <input type="text" placeholder="Cidade" value={address.cidade} onChange={(e) => setAddress({ ...address, cidade: e.target.value })}
                         className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-                      <input type="text" placeholder="CEP" value={address.cep} onChange={(e) => setAddress({ ...address, cep: e.target.value })}
+                      <input type="text" placeholder="Estado" value={address.estado} onChange={(e) => setAddress({ ...address, estado: e.target.value })}
                         className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                   </>
