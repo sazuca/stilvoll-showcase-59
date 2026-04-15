@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { LanguageProvider } from "@/i18n/LanguageContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import LoginGate from "@/components/LoginGate";
 import SiteHeader from "@/components/SiteHeader";
@@ -32,23 +33,25 @@ const Index = () => {
     }, 100);
   };
 
-  if (loading) return <LoadingScreen isVisible={true} />;
-  if (!authenticated) return <LoginGate onLogin={() => setAuthenticated(true)} />;
+  if (loading) return <LanguageProvider><LoadingScreen isVisible={true} /></LanguageProvider>;
+  if (!authenticated) return <LanguageProvider><LoginGate onLogin={() => setAuthenticated(true)} /></LanguageProvider>;
 
   return (
-    <div className="min-h-screen bg-background">
-      <SiteHeader onDelivery={() => setDeliveryOpen(true)} />
-      <HeroSection />
-      <MenuGrid />
-      <DrinksSection />
-      <ChefsSection />
-      <ExperiencesSection onReserveUnit={handleReserveUnit} />
-      <ReservationSection preselectedUnit={preselectedUnit} />
-      <ReviewsSection />
-      <ContactSection />
-      <SiteFooter />
-      <DeliveryModal isOpen={deliveryOpen} onClose={() => setDeliveryOpen(false)} />
-    </div>
+    <LanguageProvider>
+      <div className="min-h-screen bg-background">
+        <SiteHeader onDelivery={() => setDeliveryOpen(true)} />
+        <HeroSection />
+        <MenuGrid />
+        <DrinksSection />
+        <ChefsSection />
+        <ExperiencesSection onReserveUnit={handleReserveUnit} />
+        <ReservationSection preselectedUnit={preselectedUnit} />
+        <ReviewsSection />
+        <ContactSection />
+        <SiteFooter />
+        <DeliveryModal isOpen={deliveryOpen} onClose={() => setDeliveryOpen(false)} />
+      </div>
+    </LanguageProvider>
   );
 };
 
