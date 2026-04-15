@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 import tableJanela from "@/assets/table-janela.jpg";
 import tableJardim from "@/assets/table-jardim.jpg";
@@ -32,22 +33,22 @@ const tables = [
   { id: "salao", label: "Salão Principal", desc: "Ambiente clássico", image: tableSalao },
 ];
 
-// Simulate some unavailable time slots
 const unavailableSlots = new Set(["19:00", "20:30", "21:00"]);
 
 const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose: () => void; onConfirm: () => void }) => {
   const [ref, setRef] = useState("");
+  const { t } = useLanguage();
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 backdrop-blur-sm p-4" onClick={onClose}>
       <motion.div initial={{ opacity: 0, y: 30, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30 }}
         className="bg-background max-w-md w-full p-8 md:p-10 relative" onClick={e => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors"><X className="w-4 h-4" /></button>
         <div className="text-center mb-8">
-          <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-2">Pagamento</p>
-          <h3 className="text-2xl font-extralight tracking-[0.1em] text-foreground">Checkout</h3>
+          <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-2">{t("checkout.payment")}</p>
+          <h3 className="text-2xl font-extralight tracking-[0.1em] text-foreground">{t("checkout.title")}</h3>
         </div>
         <div className="text-center mb-8">
-          <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Escaneie o QR Code</p>
+          <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("checkout.scan")}</p>
           <div className="w-48 h-48 mx-auto bg-foreground p-3 mb-4">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <rect fill="white" width="100" height="100"/>
@@ -64,13 +65,13 @@ const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose
         </div>
         <div className="border-t border-border pt-6 space-y-4">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Valor</span>
+            <span className="text-muted-foreground">{t("checkout.value")}</span>
             <span className="font-medium text-foreground">{total}</span>
           </div>
-          <input type="text" placeholder="Nº de Referência do Pagamento" value={ref} onChange={e => setRef(e.target.value)}
+          <input type="text" placeholder={t("del.payRef")} value={ref} onChange={e => setRef(e.target.value)}
             className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
           <button onClick={onConfirm} className="w-full py-4 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
-            Confirmar Pagamento
+            {t("checkout.confirm")}
           </button>
         </div>
       </motion.div>
@@ -93,6 +94,7 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
   const [payment, setPayment] = useState("local");
   const [name, setName] = useState("");
   const [showCheckout, setShowCheckout] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (preselectedUnit) setSelectedUnit(preselectedUnit);
@@ -115,34 +117,33 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
   const handleReserve = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUnit || !selectedTable || !date || !time || !name) {
-      toast.error("Por favor, preencha todos os campos.");
+      toast.error(t("res.fillAll"));
       return;
     }
     if (payment === "online") {
       setShowCheckout(true);
     } else {
       const unitLabel = unitOptions.find(u => u.id === selectedUnit)?.label;
-      toast.success(`Reserva confirmada para ${name}! ${unitLabel}, Mesa: ${tables.find(t => t.id === selectedTable)?.label}, ${guests} pessoa(s), ${format(date, "dd/MM/yyyy")} às ${time}.`);
+      toast.success(t("res.confirmed", { name }) + ` ${unitLabel}, Mesa: ${tables.find(t2 => t2.id === selectedTable)?.label}, ${guests} ${Number(guests) === 1 ? t("res.person") : t("res.people")}, ${format(date, "dd/MM/yyyy")} às ${time}.`);
     }
   };
 
   const selectedUnitData = unitOptions.find(u => u.id === selectedUnit);
-  const selectedTableData = tables.find(t => t.id === selectedTable);
+  const selectedTableData = tables.find(t2 => t2.id === selectedTable);
 
   return (
     <>
       <section id="reserva" className="py-32 px-6">
         <div className="max-w-4xl mx-auto">
           <motion.div ref={sectionRef} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-16">
-            <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-4">Reserve Sua Experiência</p>
-            <h2 className="text-3xl md:text-5xl font-extralight tracking-[0.1em] text-foreground">Reserva</h2>
-            <p className="text-xs text-muted-foreground mt-4 font-light">Seg–Sex: 18h às 00h &nbsp;|&nbsp; Sáb–Dom: 19h às 23h</p>
+            <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-4">{t("res.subtitle")}</p>
+            <h2 className="text-3xl md:text-5xl font-extralight tracking-[0.1em] text-foreground">{t("res.title")}</h2>
+            <p className="text-xs text-muted-foreground mt-4 font-light">{t("res.hours")}</p>
           </motion.div>
 
           <form onSubmit={handleReserve} className="max-w-2xl mx-auto space-y-10">
-            {/* Unit Selection */}
             <div>
-              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Em qual unidade deseja viver sua experiência?</p>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("res.unitQ")}</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {unitOptions.map((unit) => (
                   <button type="button" key={unit.id} onClick={() => setSelectedUnit(unit.id)}
@@ -164,9 +165,8 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
               </AnimatePresence>
             </div>
 
-            {/* Table Selection */}
             <div>
-              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Posição da Mesa</p>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("res.table")}</p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {tables.map((table) => (
                   <button type="button" key={table.id} onClick={() => setSelectedTable(table.id)}
@@ -188,69 +188,48 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
               </AnimatePresence>
             </div>
 
-            {/* Name & Guests */}
             <div className="grid md:grid-cols-2 gap-6">
-              <input type="text" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)}
+              <input type="text" placeholder={t("res.name")} value={name} onChange={(e) => setName(e.target.value)}
                 className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
               <select value={guests} onChange={(e) => setGuests(e.target.value)}
                 className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors">
-                {[1,2,3,4,5,6,7,8,10,12].map(n => <option key={n} value={n}>{n} {n === 1 ? "pessoa" : "pessoas"}</option>)}
+                {[1,2,3,4,5,6,7,8,10,12].map(n => <option key={n} value={n}>{n} {n === 1 ? t("res.person") : t("res.people")}</option>)}
               </select>
             </div>
 
-            {/* Date Picker */}
             <div>
-              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Data</p>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("res.date")}</p>
               <Popover>
                 <PopoverTrigger asChild>
                   <button type="button"
-                    className={cn(
-                      "w-full flex items-center gap-3 border-b border-border py-3 text-sm text-left transition-colors focus:outline-none focus:border-foreground",
-                      !date && "text-muted-foreground"
-                    )}>
+                    className={cn("w-full flex items-center gap-3 border-b border-border py-3 text-sm text-left transition-colors focus:outline-none focus:border-foreground", !date && "text-muted-foreground")}>
                     <CalendarIcon className="w-4 h-4 text-muted-foreground" />
-                    {date ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione a data"}
+                    {date ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : t("res.selectDate")}
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(d) => { setDate(d); setTime(""); }}
-                    disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))}
-                    locale={ptBR}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
+                  <Calendar mode="single" selected={date} onSelect={(d) => { setDate(d); setTime(""); }} disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))} locale={ptBR} initialFocus className={cn("p-3 pointer-events-auto")} />
                 </PopoverContent>
               </Popover>
             </div>
 
-            {/* Time Slot Pills */}
             {date && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-                <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Horário</p>
+                <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("res.time")}</p>
                 <div className="flex flex-wrap gap-2">
                   {availableHours.map(h => {
                     const disabled = unavailableSlots.has(h);
                     const selected = time === h;
                     return (
-                      <button
-                        type="button"
-                        key={h}
-                        disabled={disabled}
-                        onClick={() => !disabled && setTime(h)}
+                      <button type="button" key={h} disabled={disabled} onClick={() => !disabled && setTime(h)}
                         className={cn(
                           "px-4 py-2 text-xs tracking-wider border rounded-full transition-all duration-200",
-                          selected
-                            ? "bg-foreground text-background border-foreground"
-                            : disabled
-                              ? "border-border/50 text-muted-foreground/30 cursor-not-allowed"
-                              : "border-border text-foreground hover:border-foreground/50"
-                        )}
-                      >
+                          selected ? "bg-foreground text-background border-foreground"
+                            : disabled ? "border-border/50 text-muted-foreground/30 cursor-not-allowed"
+                            : "border-border text-foreground hover:border-foreground/50"
+                        )}>
                         {h}
-                        {disabled && <span className="ml-1 text-[9px] opacity-50">lotado</span>}
+                        {disabled && <span className="ml-1 text-[9px] opacity-50">{t("res.full")}</span>}
                       </button>
                     );
                   })}
@@ -259,9 +238,9 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
             )}
 
             <div>
-              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Forma de Pagamento</p>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("res.payment")}</p>
               <div className="flex gap-4">
-                {[{ id: "local", label: "No Local" }, { id: "online", label: "Online" }].map((opt) => (
+                {[{ id: "local", label: t("res.payLocal") }, { id: "online", label: t("res.payOnline") }].map((opt) => (
                   <button type="button" key={opt.id} onClick={() => setPayment(opt.id)}
                     className={`flex items-center gap-2 px-6 py-3 border text-xs tracking-[0.15em] uppercase transition-all duration-300 ${payment === opt.id ? "border-foreground bg-foreground text-background" : "border-border hover:border-foreground/30 text-foreground"}`}>
                     {payment === opt.id && <Check className="w-3 h-3" />}
@@ -272,7 +251,7 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
             </div>
 
             <button type="submit" className="w-full py-4 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
-              Confirmar Reserva
+              {t("res.confirm")}
             </button>
           </form>
         </div>
@@ -280,14 +259,7 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
 
       <AnimatePresence>
         {showCheckout && (
-          <PaymentCheckout
-            total="€50"
-            onClose={() => setShowCheckout(false)}
-            onConfirm={() => {
-              setShowCheckout(false);
-              toast.success(`Reserva confirmada para ${name}! Pagamento recebido.`);
-            }}
-          />
+          <PaymentCheckout total="€50" onClose={() => setShowCheckout(false)} onConfirm={() => { setShowCheckout(false); toast.success(t("res.confirmed", { name }) + " Pagamento recebido."); }} />
         )}
       </AnimatePresence>
     </>

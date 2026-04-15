@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface LoadingScreenProps {
   isVisible: boolean;
 }
 
 const LoadingScreen = ({ isVisible }: LoadingScreenProps) => {
+  const { t } = useLanguage();
   return (
     <AnimatePresence>
       {isVisible && (
@@ -34,7 +36,7 @@ const LoadingScreen = ({ isVisible }: LoadingScreenProps) => {
               transition={{ duration: 1, delay: 1.4 }}
               className="text-background/50 text-xs tracking-[0.5em] mt-4 uppercase"
             >
-              Haute Cuisine Alemã
+              {t("loading.tagline")}
             </motion.p>
           </motion.div>
         </motion.div>

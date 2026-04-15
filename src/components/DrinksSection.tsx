@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Wine, Droplets, GlassWater, CupSoda, Beer } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 import drinkPilsner from "@/assets/drink-pilsner.jpg";
 import drinkWeissbier from "@/assets/drink-weissbier.jpg";
@@ -17,7 +18,7 @@ export interface DrinkItem {
 
 export const drinkCategories = [
   {
-    name: "Vinhos",
+    name: "Vinhos", nameKey: "wines",
     icon: Wine,
     items: [
       { name: "Château Margaux 2015", desc: "Bordeaux, França — Corpo intenso, taninos sedosos", price: "€320", priceNum: 320, image: drinkWine },
@@ -29,7 +30,7 @@ export const drinkCategories = [
     ],
   },
   {
-    name: "Cervejas Artesanais",
+    name: "Cervejas Artesanais", nameKey: "beers",
     icon: Beer,
     items: [
       { name: "Pilsner Urquell Premium", desc: "Estilo tcheco clássico, lúpulo Saaz, finalização limpa", price: "€14", priceNum: 14, image: drinkPilsner },
@@ -39,7 +40,7 @@ export const drinkCategories = [
     ],
   },
   {
-    name: "Cocktails",
+    name: "Cocktails", nameKey: "cocktails",
     icon: GlassWater,
     items: [
       { name: "Berliner Negroni", desc: "Gin alemão, Campari, vermute artesanal de Berlim", price: "€22", priceNum: 22, image: drinkCocktail },
@@ -49,7 +50,7 @@ export const drinkCategories = [
     ],
   },
   {
-    name: "Águas Premium",
+    name: "Águas Premium", nameKey: "waters",
     icon: Droplets,
     items: [
       { name: "Acqua Panna", desc: "Toscana — Mineral suave, pura elegância", price: "€12", priceNum: 12, image: drinkWine },
@@ -58,7 +59,7 @@ export const drinkCategories = [
     ],
   },
   {
-    name: "Sucos & Refrigerantes",
+    name: "Sucos & Refrigerantes", nameKey: "juices",
     icon: CupSoda,
     items: [
       { name: "Maçã Verde & Gengibre", desc: "Prensado a frio, orgânico", price: "€16", priceNum: 16, image: drinkWine },
@@ -73,13 +74,14 @@ const DrinksSection = () => {
   const [activeTab, setActiveTab] = useState(0);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const { t } = useLanguage();
 
   return (
     <section id="bebidas" className="py-32 px-6">
       <div className="max-w-4xl mx-auto">
         <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-16">
-          <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-4">Carta de Bebidas</p>
-          <h2 className="text-3xl md:text-5xl font-extralight tracking-[0.1em] text-foreground">Seleção Exclusiva</h2>
+          <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-4">{t("drinks.subtitle")}</p>
+          <h2 className="text-3xl md:text-5xl font-extralight tracking-[0.1em] text-foreground">{t("drinks.title")}</h2>
         </motion.div>
 
         <div className="flex justify-center gap-4 mb-12 flex-wrap">

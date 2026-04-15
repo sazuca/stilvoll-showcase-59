@@ -1,4 +1,5 @@
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useLanguage } from "@/i18n/LanguageContext";
 import heroImage from "@/assets/hero.jpg";
 
 const GermanyFlag = () => (
@@ -13,6 +14,7 @@ const GermanyFlag = () => (
 
 const HeroSection = () => {
   const { scrollY } = useScroll();
+  const { t } = useLanguage();
 
   const titleScale = useTransform(scrollY, [0, 300], [1, 0.28]);
   const titleY = useTransform(scrollY, [0, 300], [0, -window.innerHeight * 0.42 + 32]);
@@ -34,7 +36,7 @@ const HeroSection = () => {
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-6">
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
           className="text-background/60 text-xs tracking-[0.5em] uppercase mb-6 flex items-center justify-center">
-          Berlim <GermanyFlag /> Desde 1987
+          Berlim <GermanyFlag /> {t("hero.since")}
         </motion.p>
 
         <motion.h1
@@ -51,14 +53,14 @@ const HeroSection = () => {
           className="h-px bg-background/30 w-24 mb-6" />
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }}
           className="text-background/70 text-sm md:text-base font-light tracking-widest max-w-md">
-          Onde a tradição alemã encontra a elegância contemporânea
+          {t("hero.subtitle")}
         </motion.p>
         <motion.button
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.4 }}
           onClick={() => document.getElementById("cardapio")?.scrollIntoView({ behavior: "smooth" })}
           className="mt-12 px-8 py-3 border border-background/30 text-background text-xs tracking-[0.3em] uppercase hover:bg-background/10 transition-colors duration-500"
         >
-          Descobrir
+          {t("hero.cta")}
         </motion.button>
       </div>
     </section>

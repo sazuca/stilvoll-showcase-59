@@ -4,6 +4,7 @@ import { X, Check, Minus, Plus, ShoppingBag, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { featuredDishes, accordionDishes, type DishType } from "./MenuGrid";
 import { drinkCategories, type DrinkItem } from "./DrinksSection";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface CartItem {
   name: string;
@@ -26,6 +27,7 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
   const [cart, setCart] = useState<Record<string, CartItem>>({});
   const [address, setAddress] = useState({ rua: "", numero: "", bairro: "", cidade: "", estado: "", cep: "" });
   const [cepLoading, setCepLoading] = useState(false);
+  const { t } = useLanguage();
 
   const fetchCep = useCallback(async (cep: string) => {
     const clean = cep.replace(/\D/g, "");
@@ -45,10 +47,7 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
   const [payRef, setPayRef] = useState("");
 
   const addToCart = (itemName: string, price: number, type: "prato" | "bebida", image: string) => {
-    setCart(prev => ({
-      ...prev,
-      [itemName]: { name: itemName, price, qty: (prev[itemName]?.qty || 0) + 1, type, image }
-    }));
+    setCart(prev => ({ ...prev, [itemName]: { name: itemName, price, qty: (prev[itemName]?.qty || 0) + 1, type, image } }));
   };
 
   const removeFromCart = (itemName: string) => {
@@ -65,17 +64,17 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
 
   const handleNext = () => {
     if (step === 1) {
-      if (cartItems.length === 0) { toast.error("Adicione pelo menos um item ao pedido."); return; }
+      if (cartItems.length === 0) { toast.error(t("del.addItem")); return; }
       setStep(2);
     } else if (step === 2) {
-      if (!name || !phone) { toast.error("Preencha nome e telefone."); return; }
+      if (!name || !phone) { toast.error(t("del.fillName")); return; }
       setStep(3);
     } else if (step === 3) {
-      if (!address.rua || !address.numero || !address.cidade) { toast.error("Preencha o endereço completo."); return; }
+      if (!address.rua || !address.numero || !address.cidade) { toast.error(t("del.fillAddr")); return; }
       setStep(4);
     } else if (step === 4) {
       setStep(5);
-      setTimeout(() => toast.success("Pedido realizado com sucesso!"), 500);
+      setTimeout(() => toast.success(t("del.success")), 500);
     }
   };
 
@@ -96,15 +95,11 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
         <div className="flex items-center gap-2 flex-shrink-0">
           {qty > 0 && (
             <>
-              <button onClick={() => removeFromCart(itemName)} className="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:border-foreground transition-colors">
-                <Minus className="w-3 h-3" />
-              </button>
+              <button onClick={() => removeFromCart(itemName)} className="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:border-foreground transition-colors"><Minus className="w-3 h-3" /></button>
               <motion.span key={qty} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="text-sm w-4 text-center font-medium">{qty}</motion.span>
             </>
           )}
-          <button onClick={() => addToCart(itemName, price, type, image)} className="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:border-foreground transition-colors">
-            <Plus className="w-3 h-3" />
-          </button>
+          <button onClick={() => addToCart(itemName, price, type, image)} className="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:border-foreground transition-colors"><Plus className="w-3 h-3" /></button>
         </div>
       </div>
     );
@@ -112,7 +107,7 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
 
   const ReceiptSummary = () => (
     <div className="border border-border p-6 space-y-3">
-      <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">Resumo do Pedido</p>
+      <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">{t("del.summary")}</p>
       {cartItems.map(item => (
         <div key={item.name} className="flex items-center gap-3 py-1.5">
           <img src={item.image} alt={item.name} className="w-8 h-8 rounded-sm object-cover flex-shrink-0" loading="lazy" width={32} height={32} />
@@ -122,7 +117,7 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
         </div>
       ))}
       <div className="border-t border-border pt-3 flex justify-between">
-        <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">Total</span>
+        <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">{t("del.total")}</span>
         <span className="text-lg font-light text-foreground">€{total.toFixed(0)}</span>
       </div>
     </div>
@@ -134,15 +129,13 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 backdrop-blur-sm p-4" onClick={handleClose}>
           <motion.div initial={{ opacity: 0, y: 30, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: 0.97 }}
             className="bg-background max-w-lg w-full max-h-[90vh] overflow-y-auto p-8 md:p-10 relative" onClick={(e) => e.stopPropagation()}>
-            <button onClick={handleClose} className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors">
-              <X className="w-4 h-4 text-foreground" />
-            </button>
+            <button onClick={handleClose} className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors"><X className="w-4 h-4 text-foreground" /></button>
 
             <div className="text-center mb-6">
               <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-2">Stilvoll</p>
-              <h3 className="text-2xl font-extralight tracking-[0.1em] text-foreground">Pedir em Casa</h3>
+              <h3 className="text-2xl font-extralight tracking-[0.1em] text-foreground">{t("del.title")}</h3>
               <div className="flex justify-center gap-2 mt-4">
-                {[1, 2, 3, 4, 5].map((s) => (
+                {[1,2,3,4,5].map((s) => (
                   <div key={s} className={`w-5 h-0.5 transition-colors ${step >= s ? "bg-foreground" : "bg-border"}`} />
                 ))}
               </div>
@@ -150,39 +143,37 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
 
             {step === 5 ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8">
-                <div className="w-12 h-12 rounded-full bg-foreground text-background flex items-center justify-center mx-auto mb-4">
-                  <Check className="w-6 h-6" />
-                </div>
-                <h4 className="text-lg font-light text-foreground mb-2">Pedido Confirmado!</h4>
-                <p className="text-sm text-muted-foreground mb-1">Total: €{total.toFixed(0)}</p>
-                <p className="text-sm text-muted-foreground">Entrega estimada em 45-60 minutos.</p>
-                <button onClick={handleClose} className="mt-6 px-6 py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">Fechar</button>
+                <div className="w-12 h-12 rounded-full bg-foreground text-background flex items-center justify-center mx-auto mb-4"><Check className="w-6 h-6" /></div>
+                <h4 className="text-lg font-light text-foreground mb-2">{t("del.confirmed")}</h4>
+                <p className="text-sm text-muted-foreground mb-1">{t("del.total")}: €{total.toFixed(0)}</p>
+                <p className="text-sm text-muted-foreground">{t("del.delivery")}</p>
+                <button onClick={handleClose} className="mt-6 px-6 py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">{t("del.close")}</button>
               </motion.div>
             ) : step === 1 ? (
               <div className="space-y-6">
                 <div>
-                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">Pratos</p>
+                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">{t("del.dishes")}</p>
                   {allDishes.map(d => <ItemRow key={d.name} itemName={d.name} price={d.priceNum} type="prato" image={d.image} />)}
                 </div>
                 <div>
-                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">Bebidas</p>
+                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">{t("del.drinks")}</p>
                   {allDrinks.map(d => <ItemRow key={d.name} itemName={d.name} price={d.priceNum} type="bebida" image={d.image} />)}
                 </div>
                 {cartItems.length > 0 && (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-4 border-t border-border">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground flex items-center gap-2"><ShoppingBag className="w-3 h-3" /> {cartItems.reduce((s,i)=>s+i.qty,0)} itens</span>
-                      <span className="text-sm font-medium text-foreground">Total: €{total.toFixed(0)}</span>
+                      <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground flex items-center gap-2"><ShoppingBag className="w-3 h-3" /> {cartItems.reduce((s,i)=>s+i.qty,0)} {t("del.items")}</span>
+                      <span className="text-sm font-medium text-foreground">{t("del.total")}: €{total.toFixed(0)}</span>
                     </div>
                   </motion.div>
                 )}
-                <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">Próximo</button>
+                <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">{t("del.next")}</button>
               </div>
             ) : step === 4 ? (
               <div className="space-y-6">
                 <ReceiptSummary />
                 <div className="text-center">
-                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Escaneie para Pagar</p>
+                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("del.scanPay")}</p>
                   <div className="w-40 h-40 mx-auto bg-foreground p-2.5 mb-3">
                     <svg viewBox="0 0 100 100" className="w-full h-full">
                       <rect fill="white" width="100" height="100"/>
@@ -197,50 +188,46 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
                   </div>
                   <p className="text-xs text-muted-foreground">Stilvoll GmbH • Berlim</p>
                 </div>
-                <input type="text" placeholder="Nº de Referência do Pagamento" value={payRef} onChange={e => setPayRef(e.target.value)}
+                <input type="text" placeholder={t("del.payRef")} value={payRef} onChange={e => setPayRef(e.target.value)}
                   className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-                <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">Confirmar Pagamento</button>
+                <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">{t("del.confirmPay")}</button>
               </div>
             ) : (
               <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
                 {step === 2 ? (
                   <>
-                    <input type="text" placeholder="Nome completo" value={name} onChange={(e) => setName(e.target.value)}
+                    <input type="text" placeholder={t("del.fullName")} value={name} onChange={(e) => setName(e.target.value)}
                       className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-                    <input type="tel" placeholder="Telefone" value={phone} onChange={(e) => setPhone(e.target.value)}
+                    <input type="tel" placeholder={t("del.phone")} value={phone} onChange={(e) => setPhone(e.target.value)}
                       className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
                   </>
                 ) : (
                   <>
                     <div className="relative">
-                      <input type="text" placeholder="CEP" value={address.cep}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setAddress(prev => ({ ...prev, cep: val }));
-                          fetchCep(val);
-                        }}
+                      <input type="text" placeholder={t("del.cep")} value={address.cep}
+                        onChange={(e) => { const val = e.target.value; setAddress(prev => ({ ...prev, cep: val })); fetchCep(val); }}
                         className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
                       {cepLoading && <Loader2 className="w-4 h-4 animate-spin absolute right-0 top-3.5 text-muted-foreground" />}
                     </div>
-                    <input type="text" placeholder="Rua" value={address.rua} onChange={(e) => setAddress({ ...address, rua: e.target.value })}
+                    <input type="text" placeholder={t("del.street")} value={address.rua} onChange={(e) => setAddress({ ...address, rua: e.target.value })}
                       className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
                     <div className="grid grid-cols-2 gap-4">
-                      <input type="text" placeholder="Número" value={address.numero} onChange={(e) => setAddress({ ...address, numero: e.target.value })}
+                      <input type="text" placeholder={t("del.number")} value={address.numero} onChange={(e) => setAddress({ ...address, numero: e.target.value })}
                         className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-                      <input type="text" placeholder="Bairro" value={address.bairro} onChange={(e) => setAddress({ ...address, bairro: e.target.value })}
+                      <input type="text" placeholder={t("del.neighborhood")} value={address.bairro} onChange={(e) => setAddress({ ...address, bairro: e.target.value })}
                         className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                     <div className="grid grid-cols-3 gap-4">
-                      <input type="text" placeholder="Cidade" value={address.cidade} onChange={(e) => setAddress({ ...address, cidade: e.target.value })}
+                      <input type="text" placeholder={t("del.city")} value={address.cidade} onChange={(e) => setAddress({ ...address, cidade: e.target.value })}
                         className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-                      <input type="text" placeholder="Estado" value={address.estado} onChange={(e) => setAddress({ ...address, estado: e.target.value })}
+                      <input type="text" placeholder={t("del.state")} value={address.estado} onChange={(e) => setAddress({ ...address, estado: e.target.value })}
                         className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                   </>
                 )}
                 <ReceiptSummary />
                 <button type="submit" className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
-                  {step === 2 ? "Próximo" : "Ir para Pagamento"}
+                  {step === 2 ? t("del.next") : t("del.goPayment")}
                 </button>
               </form>
             )}
