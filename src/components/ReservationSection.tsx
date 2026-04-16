@@ -75,7 +75,7 @@ const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose
         <div className="text-center mb-8">
           <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-2">{t("checkout.payment")}</p>
           <h3 className="text-2xl font-extralight tracking-[0.1em] text-foreground">{t("checkout.title")}</h3>
-          <div className={`mt-3 text-sm font-light tracking-wider ${timeLeft < 60 ? "text-red-400" : "text-muted-foreground"}`}>
+          <div className={`mt-3 text-sm font-light tracking-wider ${timeLeft < 60 ? "text-destructive" : "text-muted-foreground"}`}>
             {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
           </div>
         </div>

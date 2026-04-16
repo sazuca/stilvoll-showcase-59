@@ -72,7 +72,7 @@ const LoginGate = ({ onLogin, onGuest, isPopup = false, onClose }: LoginGateProp
             <div>
               <input type="email" placeholder={t("login.email")} value={email} onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-              {errors.email && <p className="text-[10px] text-red-400 mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-[10px] text-destructive mt-1">{errors.email}</p>}
             </div>
             <div className="relative">
               <input type={showPassword ? "text" : "password"} placeholder={t("login.password")} value={password} onChange={(e) => setPassword(e.target.value)}
@@ -80,13 +80,13 @@ const LoginGate = ({ onLogin, onGuest, isPopup = false, onClose }: LoginGateProp
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-0 top-3 p-1 text-muted-foreground hover:text-foreground transition-colors">
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
-              {errors.password && <p className="text-[10px] text-red-400 mt-1">{errors.password}</p>}
+              {errors.password && <p className="text-[10px] text-destructive mt-1">{errors.password}</p>}
             </div>
             {mode === "register" && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
                 <input type="password" placeholder={t("login.confirmPassword")} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-                {errors.confirm && <p className="text-[10px] text-red-400 mt-1">{errors.confirm}</p>}
+                {errors.confirm && <p className="text-[10px] text-destructive mt-1">{errors.confirm}</p>}
               </motion.div>
             )}
             <p className="text-[10px] text-muted-foreground">{t("login.passwordHint")}</p>
@@ -103,7 +103,7 @@ const LoginGate = ({ onLogin, onGuest, isPopup = false, onClose }: LoginGateProp
             <input type="text" inputMode="numeric" maxLength={6} placeholder="000000" value={twoFaCode}
               onChange={(e) => setTwoFaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               className="w-full bg-transparent border-b border-border py-3 text-center text-2xl tracking-[0.5em] font-light text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-            {errors.twofa && <p className="text-[10px] text-red-400 mt-1 text-center">{errors.twofa}</p>}
+            {errors.twofa && <p className="text-[10px] text-destructive mt-1 text-center">{errors.twofa}</p>}
             <button type="submit" className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">
               {t("login.verify")}
             </button>

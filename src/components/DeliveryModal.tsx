@@ -154,7 +154,7 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
         <RS />
         <div className="text-center">
           <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">{t("del.scanPay")}</p>
-          <div className={`text-sm font-light tracking-wider mb-3 ${timeLeft < 60 ? "text-red-400" : "text-muted-foreground"}`}>
+          <div className={`text-sm font-light tracking-wider mb-3 ${timeLeft < 60 ? "text-destructive" : "text-muted-foreground"}`}>
             {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
           </div>
           <div className="w-40 h-40 mx-auto bg-foreground p-2.5 mb-3">
