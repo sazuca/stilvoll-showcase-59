@@ -4,7 +4,7 @@ import { MapPin } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import unitMitteFacade from "@/assets/unit-mitte-facade.jpg";
 import unitCharlottenburgFacade from "@/assets/unit-charlottenburg-facade.jpg";
-import unitFriedrichshainFacade from "@/assets/unit-friedrichshain-facade.jpg";
+import unitFriedrichshainFacade from "@/assets/stilvoll-friedrichshain-1.jpg";
 
 const units = [
   { name: "Stilvoll Mitte", address: "Unter den Linden, 42", tag: "Principal", lat: 52.5163, lng: 13.3777, image: unitMitteFacade },
