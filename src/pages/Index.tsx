@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { AnimatePresence } from "framer-motion";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import LoginGate from "@/components/LoginGate";
@@ -17,9 +18,11 @@ import SiteFooter from "@/components/SiteFooter";
 const Index = () => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [preselectedUnit, setPreselectedUnit] = useState("");
-  const reservaRef = useRef<HTMLDivElement>(null);
+  const [pendingAction, setPendingAction] = useState<"delivery" | "reservation" | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2200);
@@ -33,23 +36,63 @@ const Index = () => {
     }, 100);
   };
 
+  const handleDeliveryOpen = () => {
+    if (isGuest && !authenticated) {
+      setPendingAction("delivery");
+      setShowLoginPopup(true);
+      return;
+    }
+    setDeliveryOpen(true);
+  };
+
+  const requireAuth = (action: "delivery" | "reservation"): boolean => {
+    if (authenticated) return true;
+    if (isGuest) {
+      setPendingAction(action);
+      setShowLoginPopup(true);
+      return false;
+    }
+    return true;
+  };
+
+  const handleLoginFromPopup = () => {
+    setAuthenticated(true);
+    setIsGuest(false);
+    setShowLoginPopup(false);
+    if (pendingAction === "delivery") {
+      setTimeout(() => setDeliveryOpen(true), 200);
+    }
+    setPendingAction(null);
+  };
+
+  const handleGuest = () => {
+    setIsGuest(true);
+  };
+
+  const hasAccess = authenticated || isGuest;
+
   if (loading) return <LanguageProvider><LoadingScreen isVisible={true} /></LanguageProvider>;
-  if (!authenticated) return <LanguageProvider><LoginGate onLogin={() => setAuthenticated(true)} /></LanguageProvider>;
+  if (!hasAccess) return <LanguageProvider><LoginGate onLogin={() => setAuthenticated(true)} onGuest={handleGuest} /></LanguageProvider>;
 
   return (
     <LanguageProvider>
       <div className="min-h-screen bg-background">
-        <SiteHeader onDelivery={() => setDeliveryOpen(true)} />
+        <SiteHeader onDelivery={handleDeliveryOpen} />
         <HeroSection />
         <MenuGrid />
         <DrinksSection />
         <ChefsSection />
         <ExperiencesSection onReserveUnit={handleReserveUnit} />
-        <ReservationSection preselectedUnit={preselectedUnit} />
+        <ReservationSection preselectedUnit={preselectedUnit} requireAuth={() => requireAuth("reservation")} />
         <ReviewsSection />
         <ContactSection />
         <SiteFooter />
         <DeliveryModal isOpen={deliveryOpen} onClose={() => setDeliveryOpen(false)} />
+        <AnimatePresence>
+          {showLoginPopup && (
+            <LoginGate isPopup onLogin={handleLoginFromPopup} onGuest={() => {}} onClose={() => { setShowLoginPopup(false); setPendingAction(null); }} />
+          )}
+        </AnimatePresence>
       </div>
     </LanguageProvider>
   );

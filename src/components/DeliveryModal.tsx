@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { X, Check, Minus, Plus, ShoppingBag, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { featuredDishes, accordionDishes, type DishType } from "./MenuGrid";
@@ -123,6 +123,61 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
     </div>
   );
 
+  const DeliveryPaymentStep = ({ total: t2, cartItems: ci, payRef: pr, setPayRef: spr, handleNext: hn, ReceiptSummary: RS, handleClose: hc }: any) => {
+    const [timeLeft, setTimeLeft] = useState(180);
+    const expired = timeLeft <= 0;
+
+    useEffect(() => {
+      if (expired) return;
+      const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      return () => clearInterval(timer);
+    }, [expired]);
+
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+
+    if (expired) {
+      return (
+        <div className="text-center py-8">
+          <div className="w-12 h-12 rounded-full border-2 border-border flex items-center justify-center mx-auto mb-4">
+            <X className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <h4 className="text-lg font-light text-foreground mb-2">{t("checkout.expired")}</h4>
+          <p className="text-xs text-muted-foreground mb-6">{t("checkout.expiredDesc")}</p>
+          <button onClick={hc} className="px-8 py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">{t("del.close")}</button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <RS />
+        <div className="text-center">
+          <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">{t("del.scanPay")}</p>
+          <div className={`text-sm font-light tracking-wider mb-3 ${timeLeft < 60 ? "text-destructive" : "text-muted-foreground"}`}>
+            {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
+          </div>
+          <div className="w-40 h-40 mx-auto bg-foreground p-2.5 mb-3">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <rect fill="white" width="100" height="100"/>
+              {[0,20,40,60,80].map(x => [0,20,40,60,80].map(y => (
+                (x+y) % 40 !== 20 && <rect key={`${x}-${y}`} x={x+2} y={y+2} width="16" height="16" fill="black" rx="1"/>
+              )))}
+              <rect x="30" y="30" width="40" height="40" fill="white"/>
+              <rect x="35" y="35" width="30" height="30" fill="black" rx="2"/>
+              <rect x="40" y="40" width="20" height="20" fill="white" rx="1"/>
+              <text x="50" y="53" textAnchor="middle" fontSize="8" fill="black" fontWeight="bold">S</text>
+            </svg>
+          </div>
+          <p className="text-xs text-muted-foreground">Stilvoll GmbH • Berlim</p>
+        </div>
+        <input type="text" placeholder={t("del.payRef")} value={pr} onChange={(e: any) => spr(e.target.value)}
+          className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
+        <button onClick={hn} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">{t("del.confirmPay")}</button>
+      </div>
+    );
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -170,28 +225,7 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
                 <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">{t("del.next")}</button>
               </div>
             ) : step === 4 ? (
-              <div className="space-y-6">
-                <ReceiptSummary />
-                <div className="text-center">
-                  <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("del.scanPay")}</p>
-                  <div className="w-40 h-40 mx-auto bg-foreground p-2.5 mb-3">
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <rect fill="white" width="100" height="100"/>
-                      {[0,20,40,60,80].map(x => [0,20,40,60,80].map(y => (
-                        (x+y) % 40 !== 20 && <rect key={`${x}-${y}`} x={x+2} y={y+2} width="16" height="16" fill="black" rx="1"/>
-                      )))}
-                      <rect x="30" y="30" width="40" height="40" fill="white"/>
-                      <rect x="35" y="35" width="30" height="30" fill="black" rx="2"/>
-                      <rect x="40" y="40" width="20" height="20" fill="white" rx="1"/>
-                      <text x="50" y="53" textAnchor="middle" fontSize="8" fill="black" fontWeight="bold">S</text>
-                    </svg>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Stilvoll GmbH • Berlim</p>
-                </div>
-                <input type="text" placeholder={t("del.payRef")} value={payRef} onChange={e => setPayRef(e.target.value)}
-                  className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors" />
-                <button onClick={handleNext} className="w-full py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">{t("del.confirmPay")}</button>
-              </div>
+              <DeliveryPaymentStep total={total} cartItems={cartItems} payRef={payRef} setPayRef={setPayRef} handleNext={handleNext} ReceiptSummary={ReceiptSummary} handleClose={handleClose} />
             ) : (
               <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
                 {step === 2 ? (
