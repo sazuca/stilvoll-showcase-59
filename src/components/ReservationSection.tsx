@@ -37,7 +37,36 @@ const unavailableSlots = new Set(["19:00", "20:30", "21:00"]);
 
 const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose: () => void; onConfirm: () => void }) => {
   const [ref, setRef] = useState("");
+  const [timeLeft, setTimeLeft] = useState(180);
+  const [expired, setExpired] = useState(false);
   const { t } = useLanguage();
+
+  useEffect(() => {
+    if (expired) return;
+    if (timeLeft <= 0) { setExpired(true); return; }
+    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft, expired]);
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  if (expired) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 backdrop-blur-sm p-4" onClick={onClose}>
+        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+          className="bg-background max-w-sm w-full p-10 text-center" onClick={e => e.stopPropagation()}>
+          <div className="w-12 h-12 rounded-full border-2 border-foreground/20 flex items-center justify-center mx-auto mb-4">
+            <X className="w-5 h-5 text-foreground/40" />
+          </div>
+          <h3 className="text-lg font-extralight tracking-[0.1em] text-foreground mb-2">{t("checkout.expired")}</h3>
+          <p className="text-xs text-muted-foreground mb-6">{t("checkout.expiredDesc")}</p>
+          <button onClick={onClose} className="px-8 py-3 bg-foreground text-background text-xs tracking-[0.3em] uppercase hover:opacity-90 transition-opacity">{t("del.close")}</button>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 backdrop-blur-sm p-4" onClick={onClose}>
       <motion.div initial={{ opacity: 0, y: 30, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30 }}
@@ -46,6 +75,9 @@ const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose
         <div className="text-center mb-8">
           <p className="text-xs tracking-[0.5em] uppercase text-muted-foreground mb-2">{t("checkout.payment")}</p>
           <h3 className="text-2xl font-extralight tracking-[0.1em] text-foreground">{t("checkout.title")}</h3>
+          <div className={`mt-3 text-sm font-light tracking-wider ${timeLeft < 60 ? "text-red-400" : "text-muted-foreground"}`}>
+            {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+          </div>
         </div>
         <div className="text-center mb-8">
           <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{t("checkout.scan")}</p>
@@ -81,9 +113,10 @@ const PaymentCheckout = ({ total, onClose, onConfirm }: { total: string; onClose
 
 interface ReservationSectionProps {
   preselectedUnit?: string;
+  requireAuth?: () => boolean;
 }
 
-const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
+const ReservationSection = ({ preselectedUnit, requireAuth }: ReservationSectionProps) => {
   const sectionRef = useRef(null);
   const inView = useInView(sectionRef, { once: true, margin: "-100px" });
   const [selectedUnit, setSelectedUnit] = useState(preselectedUnit || "");
@@ -116,6 +149,7 @@ const ReservationSection = ({ preselectedUnit }: ReservationSectionProps) => {
 
   const handleReserve = (e: React.FormEvent) => {
     e.preventDefault();
+    if (requireAuth && !requireAuth()) return;
     if (!selectedUnit || !selectedTable || !date || !time || !name) {
       toast.error(t("res.fillAll"));
       return;
