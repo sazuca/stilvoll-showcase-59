@@ -7,8 +7,8 @@ import mitteFacade from "@/assets/unit-mitte-facade.jpg";
 import mitteInterior from "@/assets/unit-mitte-interior.jpg";
 import charlottenburgFacade from "@/assets/unit-charlottenburg-facade.jpg";
 import charlottenburgInterior from "@/assets/unit-charlottenburg-interior.jpg";
-import friedrichshainFacade from "@/assets/unit-friedrichshain-facade.jpg";
-import friedrichshainInterior from "@/assets/unit-friedrichshain-interior.jpg";
+import friedrichshainFacade from "@/assets/stilvoll-friedrichshain-1.jpg";
+import friedrichshainInterior from "@/assets/stilvoll-friedrichshain-2.jpg";
 
 export const units = [
   {
