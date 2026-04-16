@@ -17,7 +17,7 @@ import tableSalao from "@/assets/table-salao.jpg";
 
 import mitteFacade from "@/assets/unit-mitte-facade.jpg";
 import charlottenburgFacade from "@/assets/unit-charlottenburg-facade.jpg";
-import friedrichshainFacade from "@/assets/unit-friedrichshain-facade.jpg";
+import friedrichshainFacade from "@/assets/stilvoll-friedrichshain-1.jpg";
 
 const unitOptions = [
   { id: "mitte", label: "Stilvoll Mitte", desc: "O Epítome do Luxo", image: mitteFacade },
