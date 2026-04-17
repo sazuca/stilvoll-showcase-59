@@ -312,7 +312,7 @@ const ReservationSection = ({ preselectedUnit, requireAuth }: ReservationSection
 
       <AnimatePresence>
         {showCheckout && (
-          <PaymentCheckout total="€50" onClose={() => setShowCheckout(false)} onConfirm={() => { setShowCheckout(false); toast.success(t("res.confirmed", { name }) + " Pagamento recebido."); }} />
+          <PaymentCheckout total="€50" onClose={() => setShowCheckout(false)} onConfirm={() => { setShowCheckout(false); persistReservation(); toast.success(t("res.confirmed", { name }) + " Pagamento recebido."); }} />
         )}
       </AnimatePresence>
     </>
