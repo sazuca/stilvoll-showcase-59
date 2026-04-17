@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { reservationStore } from "@/lib/userStore";
 
 import tableJanela from "@/assets/table-janela.jpg";
 import tableJardim from "@/assets/table-jardim.jpg";
@@ -147,6 +148,23 @@ const ReservationSection = ({ preselectedUnit, requireAuth }: ReservationSection
     return hours;
   }, [date]);
 
+  const persistReservation = () => {
+    if (!date) return;
+    const unitData = unitOptions.find(u => u.id === selectedUnit);
+    const tableData = tables.find(t2 => t2.id === selectedTable);
+    reservationStore.add({
+      name,
+      unit: selectedUnit,
+      unitLabel: unitData?.label || selectedUnit,
+      table: selectedTable,
+      tableLabel: tableData?.label || selectedTable,
+      guests: Number(guests),
+      date: date.toISOString(),
+      time,
+      payment: payment as "local" | "online",
+    });
+  };
+
   const handleReserve = (e: React.FormEvent) => {
     e.preventDefault();
     if (requireAuth && !requireAuth()) return;
@@ -158,6 +176,7 @@ const ReservationSection = ({ preselectedUnit, requireAuth }: ReservationSection
       setShowCheckout(true);
     } else {
       const unitLabel = unitOptions.find(u => u.id === selectedUnit)?.label;
+      persistReservation();
       toast.success(t("res.confirmed", { name }) + ` ${unitLabel}, Mesa: ${tables.find(t2 => t2.id === selectedTable)?.label}, ${guests} ${Number(guests) === 1 ? t("res.person") : t("res.people")}, ${format(date, "dd/MM/yyyy")} às ${time}.`);
     }
   };
@@ -293,7 +312,7 @@ const ReservationSection = ({ preselectedUnit, requireAuth }: ReservationSection
 
       <AnimatePresence>
         {showCheckout && (
-          <PaymentCheckout total="€50" onClose={() => setShowCheckout(false)} onConfirm={() => { setShowCheckout(false); toast.success(t("res.confirmed", { name }) + " Pagamento recebido."); }} />
+          <PaymentCheckout total="€50" onClose={() => setShowCheckout(false)} onConfirm={() => { setShowCheckout(false); persistReservation(); toast.success(t("res.confirmed", { name }) + " Pagamento recebido."); }} />
         )}
       </AnimatePresence>
     </>

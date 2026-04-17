@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X, Globe, User } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { Lang } from "@/i18n/translations";
 
@@ -153,6 +154,14 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
               >
                 {t("nav.delivery")}
               </motion.button>
+              <Link
+                to="/conta"
+                onClick={() => setMenuOpen(false)}
+                className="text-2xl font-extralight tracking-[0.15em] text-foreground text-left inline-flex items-center gap-3"
+              >
+                <User className="w-5 h-5" />
+                {t("nav.account")}
+              </Link>
             </div>
             <div className="px-8 pb-10">
               <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">{t("nav.units")}</p>

@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import { LanguageProvider } from "@/i18n/LanguageContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import LoginGate from "@/components/LoginGate";
 import SiteHeader from "@/components/SiteHeader";
@@ -71,30 +70,28 @@ const Index = () => {
 
   const hasAccess = authenticated || isGuest;
 
-  if (loading) return <LanguageProvider><LoadingScreen isVisible={true} /></LanguageProvider>;
-  if (!hasAccess) return <LanguageProvider><LoginGate onLogin={() => setAuthenticated(true)} onGuest={handleGuest} /></LanguageProvider>;
+  if (loading) return <LoadingScreen isVisible={true} />;
+  if (!hasAccess) return <LoginGate onLogin={() => setAuthenticated(true)} onGuest={handleGuest} />;
 
   return (
-    <LanguageProvider>
-      <div className="min-h-screen bg-background">
-        <SiteHeader onDelivery={handleDeliveryOpen} />
-        <HeroSection />
-        <MenuGrid />
-        <DrinksSection />
-        <ChefsSection />
-        <ExperiencesSection onReserveUnit={handleReserveUnit} />
-        <ReservationSection preselectedUnit={preselectedUnit} requireAuth={() => requireAuth("reservation")} />
-        <ReviewsSection />
-        <ContactSection />
-        <SiteFooter />
-        <DeliveryModal isOpen={deliveryOpen} onClose={() => setDeliveryOpen(false)} />
-        <AnimatePresence>
-          {showLoginPopup && (
-            <LoginGate isPopup onLogin={handleLoginFromPopup} onGuest={() => {}} onClose={() => { setShowLoginPopup(false); setPendingAction(null); }} />
-          )}
-        </AnimatePresence>
-      </div>
-    </LanguageProvider>
+    <div className="min-h-screen bg-background">
+      <SiteHeader onDelivery={handleDeliveryOpen} />
+      <HeroSection />
+      <MenuGrid />
+      <DrinksSection />
+      <ChefsSection />
+      <ExperiencesSection onReserveUnit={handleReserveUnit} />
+      <ReservationSection preselectedUnit={preselectedUnit} requireAuth={() => requireAuth("reservation")} />
+      <ReviewsSection />
+      <ContactSection />
+      <SiteFooter />
+      <DeliveryModal isOpen={deliveryOpen} onClose={() => setDeliveryOpen(false)} />
+      <AnimatePresence>
+        {showLoginPopup && (
+          <LoginGate isPopup onLogin={handleLoginFromPopup} onGuest={() => {}} onClose={() => { setShowLoginPopup(false); setPendingAction(null); }} />
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { featuredDishes, accordionDishes, type DishType } from "./MenuGrid";
 import { drinkCategories, type DrinkItem } from "./DrinksSection";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { orderStore } from "@/lib/userStore";
 
 interface CartItem {
   name: string;
@@ -73,6 +74,12 @@ const DeliveryModal = ({ isOpen, onClose }: DeliveryModalProps) => {
       if (!address.rua || !address.numero || !address.cidade) { toast.error(t("del.fillAddr")); return; }
       setStep(4);
     } else if (step === 4) {
+      orderStore.add({
+        items: cartItems.map(i => ({ name: i.name, qty: i.qty, price: i.price, image: i.image })),
+        total,
+        address: `${address.rua}, ${address.numero} — ${address.bairro}, ${address.cidade}/${address.estado}`,
+        status: "preparing",
+      });
       setStep(5);
       setTimeout(() => toast.success(t("del.success")), 500);
     }
