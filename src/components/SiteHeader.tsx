@@ -128,7 +128,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
           >
             <div className="flex items-center justify-between px-6 h-16 border-b border-border/50">
               <span className="text-lg font-light tracking-[0.25em] text-foreground">STILVOLL</span>
-              <button onClick={() => setMenuOpen(false)} className="p-2">
+              <button onClick={() => setMenuOpen(false)} className="inline-flex items-center justify-center h-11 w-11">
                 <X className="w-5 h-5" />
               </button>
             </div>
