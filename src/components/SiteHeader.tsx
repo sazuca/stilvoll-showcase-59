@@ -79,7 +79,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
             <div className="relative">
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1.5 text-xs tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 min-h-11 min-w-11 px-2 text-xs tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Globe className="w-3.5 h-3.5" />
                 <span>{currentLang.flag}</span>
