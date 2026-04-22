@@ -79,7 +79,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
             <div className="relative">
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1.5 text-xs tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 min-h-11 min-w-11 px-2 text-xs tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Globe className="w-3.5 h-3.5" />
                 <span>{currentLang.flag}</span>
@@ -96,7 +96,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
                       <button
                         key={opt.code}
                         onClick={() => { setLang(opt.code); setLangOpen(false); }}
-                        className={`w-full flex items-center gap-2 px-4 py-2 text-xs tracking-wider transition-colors ${lang === opt.code ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
+                        className={`w-full flex items-center gap-2 px-4 min-h-11 text-xs tracking-wider transition-colors ${lang === opt.code ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
                       >
                         <span>{opt.flag}</span>
                         {opt.label}
@@ -109,7 +109,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
           </motion.nav>
 
           <motion.div style={{ opacity: navOpacity }} className="flex md:hidden items-center gap-2">
-            <button onClick={() => setMenuOpen(true)} className="p-2">
+            <button onClick={() => setMenuOpen(true)} className="inline-flex items-center justify-center h-11 w-11">
               <Menu className="w-5 h-5" />
             </button>
           </motion.div>
@@ -128,7 +128,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
           >
             <div className="flex items-center justify-between px-6 h-16 border-b border-border/50">
               <span className="text-lg font-light tracking-[0.25em] text-foreground">STILVOLL</span>
-              <button onClick={() => setMenuOpen(false)} className="p-2">
+              <button onClick={() => setMenuOpen(false)} className="inline-flex items-center justify-center h-11 w-11">
                 <X className="w-5 h-5" />
               </button>
             </div>
