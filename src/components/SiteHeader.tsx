@@ -96,7 +96,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
                       <button
                         key={opt.code}
                         onClick={() => { setLang(opt.code); setLangOpen(false); }}
-                        className={`w-full flex items-center gap-2 px-4 py-2 text-xs tracking-wider transition-colors ${lang === opt.code ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
+                        className={`w-full flex items-center gap-2 px-4 min-h-11 text-xs tracking-wider transition-colors ${lang === opt.code ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
                       >
                         <span>{opt.flag}</span>
                         {opt.label}
@@ -109,7 +109,7 @@ const SiteHeader = ({ onDelivery }: SiteHeaderProps) => {
           </motion.nav>
 
           <motion.div style={{ opacity: navOpacity }} className="flex md:hidden items-center gap-2">
-            <button onClick={() => setMenuOpen(true)} className="p-2">
+            <button onClick={() => setMenuOpen(true)} className="inline-flex items-center justify-center h-11 w-11">
               <Menu className="w-5 h-5" />
             </button>
           </motion.div>
